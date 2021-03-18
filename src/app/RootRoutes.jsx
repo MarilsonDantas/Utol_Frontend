@@ -11,6 +11,9 @@ import dragAndDropRoute from "./views/Drag&Drop/DragAndDropRoute";
 import formsRoutes from "./views/forms/FormsRoutes";
 import mapRoutes from "./views/map/MapRoutes";
 
+
+import tabelasRoutes from "./views/tabelas/TabelasRoutes";
+
 const redirectRoute = [
   {
     path: "/",
@@ -26,6 +29,7 @@ const errorRoute = [
 ];
 
 const routes = [
+  ...tabelasRoutes,
   ...sessionRoutes,
   ...dashboardRoutes,
   ...materialRoutes,

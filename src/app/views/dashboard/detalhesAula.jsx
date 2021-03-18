@@ -44,6 +44,7 @@ class detalhesAula extends Component {
     return (
       <Fragment>
 
+      {/* PROFESSOR */}
       {user.idprofessor != null ? 
         <Fragment>
           <div className="pb-24 pt-7 px-8 bg-primary">
@@ -154,9 +155,9 @@ class detalhesAula extends Component {
         </Fragment>
 
         :
-
+       
         <Fragment>
-
+          {/* ALUNO */}
           <div className="pb-24 pt-7 px-8 bg-primary">
             <div className="card-title capitalize text-white mb-4 text-white-primary">
               Aula: {aula.nome}
@@ -191,7 +192,7 @@ class detalhesAula extends Component {
                             <TableRow key={index}>
                               
                               <TableCell className="px-0 capitalize" colSpan={4} align="left">
-                                <Link to={{ pathname: 'exercicio', state: { exercicio: exercicio} }}>{exercicio.nome}</Link>                    
+                                <Link to={{ pathname: 'exercicio', state: { exercicio: exercicio, aula: aula} }}>{exercicio.nome}</Link>                    
                               </TableCell>
 
                               <TableCell className="px-0" align="left" colSpan={2}>

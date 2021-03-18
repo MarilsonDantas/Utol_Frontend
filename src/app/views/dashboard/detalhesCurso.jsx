@@ -30,6 +30,8 @@ class detalhesCurso extends Component {
   async componentDidMount(){
     const aulas = await api.get(`getAulas/${this.props.location.state.curso.idcurso}`);
 
+    console.log(aulas);
+
     this.setState({aulas: aulas.data});
   }
   
@@ -196,7 +198,7 @@ class detalhesCurso extends Component {
                             </TableCell>
 
                             <TableCell className="px-0" align="left" colSpan={2}>
-                              
+                              {aula.exercicios}
                             </TableCell>
                             <TableCell className="px-0" colSpan={1}>
                               <IconButton>

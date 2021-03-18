@@ -38,7 +38,6 @@ class Dashboard1 extends Component {
 
     this.setState({cursos: cursos.data});
 
-    console.log(cursos);
   }
 
   render() {
