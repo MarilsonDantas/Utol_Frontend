@@ -526,6 +526,8 @@ class Exercicio extends Component {
 
     const response = await api.post('storeExercicioAluno', dadosExercicio);
     
+    this.props.history.push("/dashboard/detalhesAula", {aula: this.props.location.state.aula});
+
   };
 
   handleChange = e => {

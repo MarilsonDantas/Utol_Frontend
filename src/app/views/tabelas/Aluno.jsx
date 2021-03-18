@@ -38,19 +38,21 @@ const Professor = () => {
       </div>
 
       <div className="w-full overflow-auto">
-        <Table className="whitespace-pre">
+      <Table className="whitespace-pre">
           <TableHead>
             <TableRow>
               <TableCell className="px-0">Exercicio</TableCell>
               <TableCell className="px-0">Usuário</TableCell>
+              <TableCell className="px-0">Plano de contas Pai</TableCell>
               <TableCell className="px-0">Plano de contas Usuario</TableCell>
               <TableCell className="px-0">Saldo Inicial</TableCell>
               <TableCell className="px-0">Mov Debito</TableCell>
               <TableCell className="px-0">Mov Credito</TableCell>
               <TableCell className="px-0">Saldo Final</TableCell>
-              <TableCell className="px-0">Debito Quant</TableCell>
-              <TableCell className="px-0">Credito Quant</TableCell>
               <TableCell className="px-0">Valor unitario</TableCell>
+              <TableCell className="px-0">Debito Quant.</TableCell>
+              <TableCell className="px-0">Credito Quant.</TableCell>
+              <TableCell className="px-0">Quantidade Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -62,6 +64,10 @@ const Professor = () => {
 
                 <TableCell className="px-0 capitalize" align="left">
                   {movimentacao.nmusuario ? movimentacao.nmusuario : '-'}
+                </TableCell>
+
+                <TableCell className="px-0 capitalize" align="left">
+                  {movimentacao.plano_contas_pai_nome ? movimentacao.plano_contas_pai_nome : '-'}
                 </TableCell>
 
                 <TableCell className="px-0 capitalize" align="left">
@@ -85,16 +91,22 @@ const Professor = () => {
                 </TableCell>
 
                 <TableCell className="px-0 capitalize">
+                  {movimentacao.valor_unitario ? movimentacao.valor_unitario : '-'}
+                </TableCell>
+
+                <TableCell className="px-0 capitalize">
                   {movimentacao.mov_debito_quant ? movimentacao.mov_debito_quant : '-'}
                 </TableCell>
 
                 <TableCell className="px-0 capitalize">
-                  {movimentacao.mov_cred_quant ? movimentacao.mov_cred_quant : '-'}
+                  {movimentacao.mov_credito_quant ? movimentacao.mov_credito_quant : '-'}
                 </TableCell>
 
                 <TableCell className="px-0 capitalize">
-                  {movimentacao.valor_unitario ? movimentacao.valor_unitario : '-'}
+                  {movimentacao.Saldo_final_quant ? movimentacao.Saldo_final_quant : '-'}
                 </TableCell>
+
+                
 
               </TableRow>
             ))}

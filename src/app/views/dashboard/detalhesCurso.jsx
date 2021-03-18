@@ -30,8 +30,6 @@ class detalhesCurso extends Component {
   async componentDidMount(){
     const aulas = await api.get(`getAulas/${this.props.location.state.curso.idcurso}`);
 
-    console.log(aulas);
-
     this.setState({aulas: aulas.data});
   }
   
