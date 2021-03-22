@@ -70,6 +70,8 @@ class CriarAula extends Component {
     console.log(dadosAula, this.props.location.state.curso);
 
     const response = await api.post('storeAula', dadosAula);
+
+    this.props.history.push("/dashboard/detalhesCurso", {curso: this.props.location.state.curso});
   };
 
   handleChange = event => {

@@ -95,15 +95,51 @@ const Professor = () => {
                 </TableCell>
 
                 <TableCell className="px-0 capitalize">
-                  {movimentacao.mov_debito_quant ? movimentacao.mov_debito_quant : '-'}
+                  {(() => {
+                    if (movimentacao.atributo == 'financeiro') {
+                      return (
+                        '-'
+                      )
+                    } else if (movimentacao.mov_debito_quant) {
+                      return (
+                        movimentacao.mov_debito_quant
+                      )
+                    } else {
+                      return '-'
+                    }
+                  })()}
                 </TableCell>
 
                 <TableCell className="px-0 capitalize">
-                  {movimentacao.mov_credito_quant ? movimentacao.mov_credito_quant : '-'}
+                  {(() => {
+                    if (movimentacao.atributo == 'financeiro') {
+                      return (
+                        '-'
+                      )
+                    } else if (movimentacao.mov_credito_quant) {
+                      return (
+                        movimentacao.mov_credito_quant
+                      )
+                    } else {
+                      return '-'
+                    }
+                  })()}
                 </TableCell>
 
                 <TableCell className="px-0 capitalize">
-                  {movimentacao.Saldo_final_quant ? movimentacao.Saldo_final_quant : '-'}
+                  {(() => {
+                    if (movimentacao.atributo == 'financeiro') {
+                      return (
+                        '-'
+                      )
+                    } else if (movimentacao.saldo_final_quant) {
+                      return (
+                        movimentacao.saldo_final_quant
+                      )
+                    } else {
+                      return '-'
+                    }
+                  })()}
                 </TableCell>
 
                 

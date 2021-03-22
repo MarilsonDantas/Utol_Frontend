@@ -38,8 +38,8 @@ class CriarCurso extends Component {
     dadosCurso.idprofessor_responsavel = this.props.user.idprofessor;
 
     const response = await api.post('storeCurso', dadosCurso);
-    // console.log(dadosCurso);
-    // console.log(this.state);
+
+    this.props.history.push("/dashboard/home");
   };
 
   handleChange = event => {
