@@ -2,17 +2,11 @@ import React from "react";
 import { Redirect } from "react-router-dom";
 
 import dashboardRoutes from "./views/dashboard/DashboardRoutes";
-import utilitiesRoutes from "./views/utilities/UtilitiesRoutes";
 import sessionRoutes from "./views/sessions/SessionRoutes";
-
-import materialRoutes from "./views/material-kit/MaterialRoutes";
-import dragAndDropRoute from "./views/Drag&Drop/DragAndDropRoute";
-
-import formsRoutes from "./views/forms/FormsRoutes";
-import mapRoutes from "./views/map/MapRoutes";
-
-
-import tabelasRoutes from "./views/tabelas/TabelasRoutes";
+import tablesRoutes from "./views/tables/TabelasRoutes";
+import courseRoutes from "./views/course/CourseRoutes";
+import classRoutes from "./views/classes/ClassRoutes";
+import exerciseRoutes from "./views/exercises/ExerciseRoutes";
 
 const redirectRoute = [
   {
@@ -29,16 +23,14 @@ const errorRoute = [
 ];
 
 const routes = [
-  ...tabelasRoutes,
   ...sessionRoutes,
+  ...courseRoutes,
+  ...classRoutes,
+  ...exerciseRoutes,
   ...dashboardRoutes,
-  ...materialRoutes,
-  ...utilitiesRoutes,
-  ...dragAndDropRoute,
-  ...formsRoutes,
-  ...mapRoutes,
+  ...tablesRoutes,
   ...redirectRoute,
-  ...errorRoute
+  ...errorRoute,
 ];
 
 export default routes;

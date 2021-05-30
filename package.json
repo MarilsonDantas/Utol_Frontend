@@ -10,11 +10,12 @@
     "@material-ui/icons": "^4.2.1",
     "@material-ui/lab": "^4.0.0-alpha.22",
     "@material-ui/pickers": "^3.2.2",
+    "@react-pdf/renderer": "^2.0.6",
     "autosuggest-highlight": "^3.1.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "babel-polyfill": "^6.26.0",
     "clsx": "^1.0.4",
-    "cross-fetch": "^3.0.4",
+    "cross-fetch": "^3.1.4",
     "css-vars-ponyfill": "^2.1.2",
     "date-fns": "^2.15.0",
     "downshift": "^3.2.10",
@@ -79,6 +80,6 @@
     "customize-cra": "^0.9.1",
     "eslint-plugin-react-hooks": "0.0.0-8d7535e54",
     "gh-pages": "^2.1.1",
-    "react-app-rewired": "^2.1.5"
+    "react-app-rewired": "^2.1.8"
   }
 }

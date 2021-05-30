@@ -1,6 +1,6 @@
 import React from "react";
 
-const tabelasRoutes = [
+const tablesRoutes = [
   {
     path: "/tabelas/professor",
     component: React.lazy(() => import("./Professor"))
@@ -11,4 +11,4 @@ const tabelasRoutes = [
   }
 ];
 
-export default tabelasRoutes;
+export default tablesRoutes;

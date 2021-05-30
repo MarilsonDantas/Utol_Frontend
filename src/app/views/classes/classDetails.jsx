@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useEffect, useState } from "react";
 
 import { 
   Grid, 
@@ -22,24 +22,24 @@ import { connect } from "react-redux";
 import api from "../../services/api";
 
 
-class detalhesAula extends Component {
-  state = {
-    exercicios: [],
-  };
-
-  async componentDidMount(){
-    const exercicios = await api.get(`getExercicios/${this.props.location.state.aula.idaula}`);
-
-    this.setState({exercicios: exercicios.data});
-  }
+const ClassDetails = props => {
   
+    const [exercicios, setExercicios] = useState([]);
+    const [aula, setAula] = useState({});
 
-  render() {
-    const {aula} = this.props.location.state;
+    const {id_class} = props.match.params;
 
-    let {exercicios} = this.state;
+    useEffect(() => {
+        async function loadExercicios() {
+            var response = await api.get(`getExerciciosByAula/${id_class}`);
+            setExercicios(response.data);
+            setAula({idaula: response.data[0].idaula, nomeaula: response.data[0].nomeaula});
+        }
 
-    let { user } = this.props;
+        loadExercicios();
+    }, []);
+
+    let { user } = props;
 
     return (
       <Fragment>
@@ -49,7 +49,7 @@ class detalhesAula extends Component {
         <Fragment>
           <div className="pb-24 pt-7 px-8 bg-primary">
             <div className="card-title capitalize text-white mb-4 text-white-primary">
-              Aula: {aula.nome}
+              Aula: {aula.nomeaula}
             </div>
           </div>
 
@@ -60,7 +60,7 @@ class detalhesAula extends Component {
                 {/* Cards */}
                 <Grid container spacing={3} className="mb-6">
                   <Grid item xs={12} md={4}>
-                    <Link to={{ pathname: 'criarExercicio', state: { aula: aula} }}>
+                    <Link to={`/exercicio/adicionar/${aula.idaula}`}>
                       <Card elevation={3} className="p-4">            
                         <div className="flex items-center">
                           <Fab
@@ -124,11 +124,14 @@ class detalhesAula extends Component {
                       </TableHead>
                       <TableBody>
                         {exercicios.map((exercicio, index) => (
-                          
-                            <TableRow key={index}>
+                          <Fragment key={index}>
+
+                            {exercicio.idexercicio && 
+                            <TableRow>
                               
                               <TableCell className="px-0 capitalize" colSpan={4} align="left">
-                                <Link to={{ pathname: 'detalhesExercicio', state: { exercicio: exercicio} }}>{exercicio.nome}</Link>                    
+                                <Link to={`/exercicio/${exercicio.idexercicio}`}>{exercicio.nome}</Link>                 
+             
                               </TableCell>
 
                               <TableCell className="px-0" align="left" colSpan={2}>
@@ -141,6 +144,8 @@ class detalhesAula extends Component {
                                 </IconButton>
                               </TableCell>
                             </TableRow>
+                            }
+                        </Fragment>
                         ))}
                       </TableBody>
                     </Table>
@@ -224,10 +229,9 @@ class detalhesAula extends Component {
         
       </Fragment>
     );
-  }
 }
 
-detalhesAula.propTypes = {
+ClassDetails.propTypes = {
   user: PropTypes.object.isRequired,
 };
 
@@ -238,6 +242,6 @@ const mapStateToProps = state => ({
 export default withStyles({}, { withTheme: true })(
   withRouter(
     connect(mapStateToProps, {
-    })(detalhesAula)
+    })(ClassDetails)
   )
 );

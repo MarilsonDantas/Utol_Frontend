@@ -46,7 +46,7 @@ class Dashboard1 extends Component {
 
     let {cursos} = this.state;
 
-    console.log("Usuario logado -> ",user);
+    console.log(cursos);
 
     return (
       
@@ -58,7 +58,7 @@ class Dashboard1 extends Component {
         <Fragment>
           <div className="pb-24 pt-7 px-8 bg-primary">
             <div className="card-title capitalize text-white mb-4 text-white-primary">
-              Meus cursos {user.nmusuario}
+              Meus cursos
             </div>
           </div>
 
@@ -67,7 +67,7 @@ class Dashboard1 extends Component {
               <Grid item lg={12} md={12} sm={12} xs={12}>
                 <Grid container spacing={3} className="mb-6">
                   <Grid item xs={12} md={4}>
-                    <Link to={"criarCurso"}>
+                    <Link to={'/curso/adicionar'}>
                       <Card elevation={3} className="p-4">            
                         <div className="flex items-center">
                           <Fab
@@ -138,7 +138,8 @@ class Dashboard1 extends Component {
                             <TableRow key={index}>
                               
                               <TableCell className="px-0 capitalize" colSpan={4} align="left">
-                                <Link to={{ pathname: 'detalhesCurso', state: { curso: curso} }}>{curso.nome}</Link>                    
+                                {/* <Link to={{ pathname: 'detalhesCurso', state: { curso: curso} }}>{curso.nome}</Link>*/}
+                                <Link to={`/curso/${curso.idcurso}`}>{curso.nome}</Link>
                               </TableCell>
 
                               <TableCell className="px-0" align="left" colSpan={2}>                              

@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useEffect, useState } from "react";
 
 import { 
   Grid, 
@@ -21,25 +21,23 @@ import PropTypes from "prop-types";
 import { withRouter, Link } from "react-router-dom";
 import { connect } from "react-redux";
 
+const CourseDetails = props => {
+    const [aulas, setAulas] = useState([]);
+    const [curso, setCurso] = useState({});
 
-class detalhesCurso extends Component {
-  state = {
-    aulas: [],
-  };
+    const {id_course} = props.match.params;
 
-  async componentDidMount(){
-    const aulas = await api.get(`getAulas/${this.props.location.state.curso.idcurso}`);
+    useEffect(() => {
+        async function loadCursoAulas() {
+            var response = await api.get(`getCursoAulaById/${id_course}`);
+            setAulas(response.data);
+            setCurso({idcurso: response.data[0].idcurso, nomecurso: response.data[0].nomecurso});
+        }
 
-    this.setState({aulas: aulas.data});
-  }
-  
+        loadCursoAulas();
+    }, []);
 
-  render() {
-    const {curso} = this.props.location.state;
-
-    let { user } = this.props;
-
-    let {aulas} = this.state;
+    let { user } = props;
 
     return (
       <Fragment>
@@ -49,7 +47,7 @@ class detalhesCurso extends Component {
         <Fragment>
         <div className="pb-24 pt-7 px-8 bg-primary">
           <div className="card-title capitalize text-white mb-4 text-white-primary">
-            Curso: {curso.nome}
+            Curso: {curso.nomecurso}
           </div>
         </div>
 
@@ -60,7 +58,7 @@ class detalhesCurso extends Component {
               {/* Cards */}
               <Grid container spacing={3} className="mb-6">
                 <Grid item xs={12} md={4}>
-                  <Link to={{ pathname: 'criarAula', state: { curso: curso} }}>
+                  <Link to={{ pathname: `/aula/adicionar/${curso.idcurso}` }}>
                     <Card elevation={3} className="p-4">            
                       <div className="flex items-center">
                         <Fab
@@ -123,23 +121,29 @@ class detalhesCurso extends Component {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {aulas.map((aula, index) => (
-                        
-                          <TableRow key={index}>
-                            
-                            <TableCell className="px-0 capitalize" colSpan={4} align="left">
-                              <Link to={{ pathname: 'detalhesAula', state: { aula: aula} }}>{aula.nome}</Link>                    
-                            </TableCell>
+                    
+                    { aulas.map((aula, index) => (
+                        <Fragment key={index}>
 
-                            <TableCell className="px-0" align="left" colSpan={2}>
-                              
-                            </TableCell>
-                            <TableCell className="px-0" colSpan={1}>
-                              <IconButton>
-                                <Icon color="primary">edit</Icon>
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
+                            {aula.idaula && 
+                            <TableRow>
+                                
+                                <TableCell className="px-0 capitalize" colSpan={4} align="left">
+                                    <Link to={`/aula/${aula.idaula}`}>{aula.nome}</Link>                    
+                                </TableCell>
+
+                                <TableCell className="px-0" align="left" colSpan={2}>
+                                
+                                </TableCell>
+                                <TableCell className="px-0" colSpan={1}>
+                                <IconButton>
+                                    <Icon color="primary">edit</Icon>
+                                </IconButton>
+                                </TableCell>
+                            </TableRow>
+                            }
+                          
+                          </Fragment>
                       ))}
                     </TableBody>
                   </Table>
@@ -159,7 +163,7 @@ class detalhesCurso extends Component {
 
         <div className="pb-24 pt-7 px-8 bg-primary">
           <div className="card-title capitalize text-white mb-4 text-white-primary">
-            Curso: {curso.nome}
+            Curso: {curso.cursonome}
           </div>
         </div>
 
@@ -224,9 +228,8 @@ class detalhesCurso extends Component {
       </Fragment>
     );
   }
-}
 
-detalhesCurso.propTypes = {
+  CourseDetails.propTypes = {
   user: PropTypes.object.isRequired,
 };
 
@@ -237,7 +240,7 @@ const mapStateToProps = state => ({
 export default withStyles({}, { withTheme: true })(
   withRouter(
     connect(mapStateToProps, {
-    })(detalhesCurso)
+    })(CourseDetails)
   )
 );
 

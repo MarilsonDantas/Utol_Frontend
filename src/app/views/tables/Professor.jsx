@@ -14,7 +14,7 @@ import { Breadcrumb, SimpleCard } from "matx";
 import api from "../../services/api";
 
 
-const Professor = () => {
+const Professor = props => {
 
   const [movimentacoes, setMovimentacoes] = useState([])
 

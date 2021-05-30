@@ -30,7 +30,7 @@ import api from "../../services/api";
 class CriarExercicio extends Component {
   state = {
     nome: "",
-    idaula: this.props.location.state.aula.idaula,
+    idaula: this.props.match.params.id_class,
     descricao: "",
     contasDebito: [],
     contasCredito: [],
@@ -44,19 +44,18 @@ class CriarExercicio extends Component {
   async componentDidMount(){
     const contas_pai = await api.get(`getPlanoDeContasPai`);
 
-    const contasAula = await api.get(`getPlanoDeContasAula/${this.props.location.state.aula.idaula}`);
+    const contasAula = await api.get(`getPlanoDeContasAula/${this.props.match.params.id_class}`);
 
     var contasDebitoArray = [];
     var contasCreditoArray = [];
 
     contas_pai.data.forEach(conta => {
-      if (conta.tipo == 'D') {
+      if (conta.type == 'D') {
         contasDebitoArray.push(conta);
       }        
       else {
         contasCreditoArray.push(conta);
       }
-
     });
 
     const resultDebito = [...contasAula.data, ...contasDebitoArray, ...contasCreditoArray];
@@ -80,8 +79,12 @@ class CriarExercicio extends Component {
 
     const response = await api.post('storeExercicio', dadosExercicio);
     
-    this.props.history.push("/dashboard/detalhesAula", {aula: this.props.location.state.aula});
-    
+    // console.log(response); 
+    if (response.data == true){
+      // this.props.history.push("/dashboard/detalhesExercicio", {exercicio: dadosExercicio, usuario: this.props.user});
+    }
+    // this.props.history.push("/dashboard/detalhesAula", {aula: this.props.location.state.aula});
+
   };
 
   handleChange = e => {
@@ -243,7 +246,7 @@ class CriarExercicio extends Component {
 
             <Grid container style={{flexDirection: 'row', justifyContent: 'space-between'}} item lg={12} md={12} sm={12} xs={12} spacing={6}>
 
-              <Grid item  item lg={6} md={6} sm={12} xs={12}>   
+              <Grid item lg={6} md={6} sm={12} xs={12}>   
                 <Grid container style={{flexDirection: 'row', justifyContent: 'space-between'}} spacing={1} item>
 
                   <Grid item lg={8} md={8} sm={8} xs={8}>

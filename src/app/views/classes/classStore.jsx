@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment, useEffect, useState } from "react";
 
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
@@ -29,80 +29,67 @@ import api from "../../services/api";
 import DateFnsUtils from "@date-io/date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 
-class CriarAula extends Component {
-  state = {}
-
-  state = {
-    nome: "",
-    tipo: "",
-    descricao: "",
-    data_inicio: new Date(),
-    data_fim: new Date()
-  };
-
-  changeDate = (str) => {
-      var month, day, hours, minutes, seconds;
-
-      var date = new Date(str),
-          month = ("0" + (date.getMonth() + 1)).slice(-2),
-          day = ("0" + date.getDate()).slice(-2);
-          hours = ("0" + date.getHours()).slice(-2);
-          minutes = ("0" + date.getMinutes()).slice(-2);
-          seconds = ("0" + date.getSeconds()).slice(-2);
-
-      var mySQLDate = [date.getFullYear(), month, day].join("-");
-      var mySQLTime = [hours, minutes, seconds].join(":");
-      return [mySQLDate, mySQLTime].join(" ");    
-  }
-
-  handleSubmit = async (event) => {
-
-    this.setState({ data_inicio: this.changeDate(this.state.data_inicio) });
-    this.setState({ data_fim: this.changeDate(this.state.data_fim) });
-
+const ClassStore = props => {
     
-    const dadosAula = this.state;
-
-    dadosAula.usuario_inclusao = this.props.user.idusuario;
-    // dadosAula.data_inclusao = new Date();
-    dadosAula.curso_idcurso =  this.props.location.state.curso.idcurso;
-
-    console.log(dadosAula, this.props.location.state.curso);
-
-    const response = await api.post('storeAula', dadosAula);
-
-    this.props.history.push("/dashboard/detalhesCurso", {curso: this.props.location.state.curso});
-  };
-
-  handleChange = event => {
-    event.persist();
-    this.setState({ [event.target.name]: event.target.value });
-  };
-
-  handleDateChangeInicio = data_inicio => {
-    this.setState({ data_inicio });
-  };
-
-  handleDateChangeFim = data_fim => {
-    this.setState({ data_fim });
-  };
+  const {id_course} = props.match.params;
 
 
-  onTagsChange = (event, values) => {
-    this.setState({
-      tipo: values.label
-    });
-  }
+  const [nome, setNome] = useState('');
+  const [tipo, setTipo] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [data_inicio, setData_Inicio] = useState(new Date());
+  const [data_fim, setData_Fim] = useState(new Date());
+  const [curso, setCurso] = useState({});
 
-  render() {
-    let {
-        nome,
-        descricao,
-        data_inicio,
-        data_fim,
-    } = this.state;
+    useEffect(() => {
+        async function loadCursoAulas() {
+            var response = await api.get(`getCursoAulaById/${id_course}`);
+            console.log(response);
+            // setCurso({idcurso: response.data[0].idcurso, nomecurso: response.data[0].nomecurso});
+        }
 
-    const {curso} = this.props.location.state;
+        loadCursoAulas();
+    }, []);
+
+
+  function changeDate(str) {
+        var month, day, hours, minutes, seconds, date;
+
+        date = new Date(str)
+            month = ("0" + (date.getMonth() + 1)).slice(-2)
+            day = ("0" + date.getDate()).slice(-2)
+            hours = ("0" + date.getHours()).slice(-2)
+            minutes = ("0" + date.getMinutes()).slice(-2)
+            seconds = ("0" + date.getSeconds()).slice(-2)
+
+        let mySQLDate = [date.getFullYear(), month, day].join("-");
+        let mySQLTime = [hours, minutes, seconds].join(":");
+        return [mySQLDate, mySQLTime].join(" ");    
+    }
+
+   
+
+    async function handleSubmit () {
+        
+        let dadosAula = {};
+
+        dadosAula.data_inicio = changeDate(data_inicio);
+        dadosAula.data_fim = changeDate(data_fim);
+
+        dadosAula.usuario_inclusao = props.user.idusuario;
+        dadosAula.data_inclusao = changeDate(new Date());
+        dadosAula.curso_idcurso = id_course;
+        dadosAula.nome = nome;
+        dadosAula.tipo = tipo;
+        dadosAula.descricao = descricao;
+
+        console.log(dadosAula);
+
+        const response = await api.post('storeAula', dadosAula);
+
+        props.history.push(`/curso/detalhesCurso/${id_course}`);
+    }
+
 
     return (
       <div className="m-sm-30">
@@ -110,17 +97,16 @@ class CriarAula extends Component {
         <div className="mb-sm-30">
           <Breadcrumb
             routeSegments={[
-              { name: "Cursos", path: "/dashboard/analytics" },
+              { name: "Cursos", path: "/cursos/detalhesCurso" },
               { name: "Criação de aula" }
             ]}
           />
         </div>
 
-        <SimpleCard title={`Criação de aula para curso: ${curso.nome}`}>
+        <SimpleCard title={`Criação de aula para curso: ${curso.nomecurso}`}>
           <div>
           <ValidatorForm
-            ref="form"
-            onSubmit={this.handleSubmit}
+            onSubmit={handleSubmit}
             onError={errors => null}
           >
             <Grid container spacing={6}>
@@ -128,7 +114,7 @@ class CriarAula extends Component {
                 <TextValidator
                   className="mb-4 w-full"
                   label="Nome"
-                  onChange={this.handleChange}
+                  onChange={e => setNome(e.target.value)}
                   type="text"
                   name="nome"
                   value={nome}
@@ -141,20 +127,22 @@ class CriarAula extends Component {
 
               <Grid item lg={6} md={6} sm={12} xs={12}>
                 <Autocomplete
-                  className="mb-6 w-full"
-                  options={[{label: 'Prova'}, {label: "Aula teórica"}, {label: "Aulas de exercicios"}]}
-                  onChange={this.onTagsChange}
-                  name="tipo"
-                  getOptionLabel={option => option.label}
-                  renderInput={params => (
-                    <TextField
-                      {...params}
-                      label={"Tipo"}
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
+                    className="mb-6 w-full"
+                    options={[{label: 'Prova'}, {label: "Aula teórica"}, {label: "Aulas de exercicios"}]}
+                    // onChange={option => setTipo(option.label)}
+                    onChange={(_, value) => { setTipo(value.label) }}
+                    name="tipo"
+                    getOptionLabel={option => option.label}
+                    renderInput={params => (
+                        <TextField
+                        {...params}
+                        label={"Tipo"}
+                        variant="outlined"
+                        fullWidth
+                        />
+                    )}
                 />
+
               </Grid>
             </Grid>
 
@@ -169,7 +157,7 @@ class CriarAula extends Component {
                     type="text"
                     autoOk={true}
                     value={data_inicio}
-                    onChange={this.handleDateChangeInicio}
+                    onChange={e => setData_Inicio(e.target.value)}
                     KeyboardButtonProps={{
                       "aria-label": "change date"
                     }}
@@ -187,7 +175,7 @@ class CriarAula extends Component {
                     type="text"
                     autoOk={true}
                     value={data_fim}
-                    onChange={this.handleDateChangeFim}
+                    onChange={e => setData_Fim(e)}
                     KeyboardButtonProps={{
                       "aria-label": "change date"
                     }}
@@ -200,7 +188,7 @@ class CriarAula extends Component {
                 <TextValidator
                   className="mb-4 w-full"
                   label="Descrição"
-                  onChange={this.handleChange}
+                  onChange={e => setDescricao(e.target.value)}
                   type="text"
                   name="descricao"
                   value={descricao}
@@ -220,10 +208,9 @@ class CriarAula extends Component {
 
       </div>
     );
-  }
 }
 
-CriarAula.propTypes = {
+ClassStore.propTypes = {
   user: PropTypes.object.isRequired,
 };
 
@@ -236,7 +223,7 @@ const mapStateToProps = state => ({
 export default withStyles({}, { withTheme: true })(
   withRouter(
     connect(mapStateToProps, {
-    })(CriarAula)
+    })(ClassStore)
   )
 );
 
