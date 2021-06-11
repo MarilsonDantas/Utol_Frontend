@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 
 import { Breadcrumb, SimpleCard, SimpleCardWithoutStyle } from "matx";
+import { withRouter, Link } from "react-router-dom";
 
 import api from "../../services/api";
 
@@ -24,21 +25,20 @@ const ExerciseDetails = props => {
   const [movimentacoesCredito, setMovimentacoesCredito] = useState(false)
 
   const {id_exercise} = props.match.params;
-  
+  const {id_class} = props.match.params;
+
   useEffect(() => {
     async function loadMovimentacoes() {
 
-      const movimentacoesResult = await api.get(`getMovimentacaoByExercicio/${id_exercise}`);
-
+      const movimentacoesResult = await api.get(`getReleasesByExercicio/${id_exercise}`);
+      console.log(movimentacoesResult.data);
       setMovimentacoes(movimentacoesResult.data);
       setExercicio({nome_exercicio: movimentacoesResult.data[0].nome_exercicio, descricao_exercicio: movimentacoesResult.data[0].descricao_exercicio});
 
       movimentacoesResult.data.forEach(movimentacao => {
-        if (movimentacao.mov_debito_valor){
+        if (movimentacao.release_type == "D"){
           setMovimentacoesDebito(true);
-        } 
-        
-        if (movimentacao.mov_credito_valor){
+        } else if (movimentacao.release_type == "C"){
           setMovimentacoesCredito(true);
         }
 
@@ -92,21 +92,21 @@ const ExerciseDetails = props => {
                   
                     {movimentacoes.map((movimentacao, index) => (
                       <Fragment>
-                        {movimentacao.mov_debito_valor ? 
+                        {movimentacao.release_type == "D" ? 
                         
                           <TableRow>
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.nome}
+                              {movimentacao.category}
                             </TableCell>
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.valor_unitario}
+                              {movimentacao.value/movimentacao.amount}
                             </TableCell>
                             
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.mov_debito_quant}
+                              {movimentacao.amount}
                             </TableCell>
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.mov_debito_valor}
+                              {movimentacao.value}
                             </TableCell>
                           </TableRow>
                         : 
@@ -155,21 +155,21 @@ const ExerciseDetails = props => {
                   
                     {movimentacoes.map((movimentacao, index) => (
                       <Fragment>
-                        {movimentacao.mov_credito_valor ? 
+                        {movimentacao.release_type == "C" ? 
                         
                           <TableRow>
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.nome}
+                              {movimentacao.category}
                             </TableCell>
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.valor_unitario}
+                              {movimentacao.value/movimentacao.amount}
                             </TableCell>
                             
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.mov_credito_quant}
+                              {movimentacao.amount}
                             </TableCell>
                             <TableCell className="px-0 capitalize" align="left">
-                              {movimentacao.mov_credito_valor}
+                              {movimentacao.value}
                             </TableCell>
                           </TableRow>
                         : 
@@ -203,7 +203,15 @@ const ExerciseDetails = props => {
             {/* <a href="/dashboard/pdf" target="_blank">
               <Button variant="contained" color="primary">Balanço Patrimonial</Button>
             </a> */}
-            <Button onClick={() => props.history.push("/dashboard/pdf")} variant="contained" color="primary">Balanço Patrimonial</Button>
+            <Link style={{marginRight: '10px'}} to={{ pathname: `/exercicio/balancete-quantitativo/${id_class}/${id_exercise}`}}>
+              <Button variant="contained" color="primary">Balancete Quantitativo</Button>
+            </Link>
+            <Link style={{marginRight: '10px'}} to={{ pathname: `/exercicio/balancete-financeiro/${id_class}/${id_exercise}`}}>
+              <Button variant="contained" color="primary">Balancete Financeiro</Button>
+            </Link>
+            <Link to={{ pathname: `/exercicio/balancoPatrimonial/${id_class}/${id_exercise}`}}>
+              <Button variant="contained" color="primary">Balanço Patrimonial</Button>
+            </Link>
           </div>
         </SimpleCardWithoutStyle>
       </div>

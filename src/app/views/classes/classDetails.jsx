@@ -60,7 +60,7 @@ const ClassDetails = props => {
                 {/* Cards */}
                 <Grid container spacing={3} className="mb-6">
                   <Grid item xs={12} md={4}>
-                    <Link to={`/exercicio/adicionar/${aula.idaula}`}>
+                    <Link to={`/exercicio/adicionar/${id_class}`}>
                       <Card elevation={3} className="p-4">            
                         <div className="flex items-center">
                           <Fab
@@ -130,7 +130,7 @@ const ClassDetails = props => {
                             <TableRow>
                               
                               <TableCell className="px-0 capitalize" colSpan={4} align="left">
-                                <Link to={`/exercicio/${exercicio.idexercicio}`}>{exercicio.nome}</Link>                 
+                                <Link to={`/exercicio/${exercicio.idexercicio}/${id_class}`}>{exercicio.nome}</Link>                 
              
                               </TableCell>
 

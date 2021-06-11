@@ -27,7 +27,7 @@ import { Autocomplete } from "@material-ui/lab";
 
 import api from "../../services/api";
 
-class CriarExercicio extends Component {
+class ExerciseStore extends Component {
   state = {
     nome: "",
     idaula: this.props.match.params.id_class,
@@ -42,14 +42,14 @@ class CriarExercicio extends Component {
   };
 
   async componentDidMount(){
-    const contasPai = await api.get(`getCategoriesFathers`);
+    const contas_pai = await api.get(`getPlanoDeContasPai`);
 
-    const contasAula = await api.get(`getCategoriesByClass/${this.props.match.params.id_class}`);
+    const contasAula = await api.get(`getPlanoDeContasAula/${this.props.match.params.id_class}`);
 
     var contasDebitoArray = [];
     var contasCreditoArray = [];
 
-    contasAula.data.forEach(conta => {
+    contas_pai.data.forEach(conta => {
       if (conta.type == 'D') {
         contasDebitoArray.push(conta);
       }        
@@ -58,8 +58,8 @@ class CriarExercicio extends Component {
       }
     });
 
-    const resultDebito  = [ ...contasDebitoArray, ...contasCreditoArray, ...contasPai.data ];
-    const resultCredito = [ ...contasCreditoArray, ...contasDebitoArray, ...contasPai.data ];
+    const resultDebito = [...contasAula.data, ...contasDebitoArray, ...contasCreditoArray];
+    const resultCredito = [...contasAula.data, ...contasCreditoArray, ...contasDebitoArray];
 
     this.setState({contasDebito: resultDebito});
     this.setState({contasCredito: resultCredito});
@@ -78,8 +78,7 @@ class CriarExercicio extends Component {
     delete dadosExercicio.contasDebito;
 
     console.log(dadosExercicio);
-
-    const response = await api.post('storeExercicio', dadosExercicio);
+    // const response = await api.post('storeExercicio', dadosExercicio);
     
     // console.log(response); 
     // if (response.data == true){
@@ -95,7 +94,7 @@ class CriarExercicio extends Component {
       
       let movimentacaoDebito = [...this.state.movimentacaoDebito]
       movimentacaoDebito[e.target.dataset.id][e.target.className] = e.target.value; 
-      this.setState({ movimentacaoDebito }, () => console.log("Debito",this.state.movimentacaoDebito));
+      this.setState({ movimentacaoDebito }, () => console.log("Debito",this.state.movimentacaoCredito));
 
       var valorConta = 0;
       var movimentacoesPassadas = [];
@@ -186,6 +185,7 @@ class CriarExercicio extends Component {
       historico
     } = this.state;
 
+
     return (
       <div className="m-sm-30">
 
@@ -256,7 +256,7 @@ class CriarExercicio extends Component {
                       options={contasDebito}
                       onChange={this.onDebitoChange}
                       name="tipo"
-                      getOptionLabel={option => option.category}
+                      getOptionLabel={option => option.nome}
                       renderInput={params => (
                         <TextField
                         {...params}
@@ -307,21 +307,22 @@ class CriarExercicio extends Component {
                           let movimentacaoDebitoQuantidade = `quantidadeDebito-${index}`;
                           let movimentacaoDebitoContaNome = `nomeContaDebito-${index}`;
                           let movimentacaoDebitoValorInicial = `valorInicial-${index}`;
+                          console.log("Movimentacao Debito -> ", movimentacao);
 
                           return (
                             <TableRow key={index}>
                             
-                            {movimentacao.is_father == null ? 
+                            {movimentacao.isPlanoContasUsuario ? 
                               
                               <TableCell className="px-0 capitalize" colSpan={4} align="left">
-                                {movimentacao.category}
+                                {movimentacao.nome}
                               </TableCell>
                               
                               : 
                               
                               <TableCell style={styleTableCell} className="px-0 capitalize" colSpan={4} align="left">
                                 <div style={movimentacaoColumnStyle} >
-                                  <div style={stylesFont} >{movimentacao.category}</div>   
+                                  <div style={stylesFont} >{movimentacao.nome}</div>   
                                   <input
                                     // InputProps={{ disableUnderline: true }}
                                     style={inputStyle}
@@ -355,7 +356,7 @@ class CriarExercicio extends Component {
                               </TableCell>
 
 
-                              {movimentacao.attribute == "quantitativo" ? 
+                              {movimentacao.atributo == "quantitativo" ? 
 
 
                               <TableCell style={styleTableCell} className="px-0" align="left" colSpan={2}>
@@ -386,7 +387,7 @@ class CriarExercicio extends Component {
                               </TableCell>
                               }
 
-                              {movimentacao.is_father == null ? 
+                              {movimentacao.isPlanoContasUsuario ? 
                               
                                 <TableCell className="px-0 capitalize" colSpan={4} align="left" colSpan={1}>
                                   -
@@ -433,7 +434,7 @@ class CriarExercicio extends Component {
                       options={contasCredito}
                       onChange={this.onCreditoChange}
                       name="tipo"
-                      getOptionLabel={option => option.category}
+                      getOptionLabel={option => option.nome}
                       renderInput={params => (
                         <TextField
                         {...params}
@@ -488,17 +489,18 @@ class CriarExercicio extends Component {
 
                             <TableRow key={index}>
 
-                              {movimentacao.is_father == null ? 
+
+                              {movimentacao.isPlanoContasUsuario ? 
                               
                                 <TableCell className="px-0 capitalize" colSpan={4} align="left">
-                                  {movimentacao.category}
+                                  {movimentacao.nome}
                                 </TableCell>
                                 
                                 : 
                                 
                                 <TableCell style={styleTableCell} className="px-0 capitalize" colSpan={4} align="left">
                                   <div style={movimentacaoColumnStyle} >
-                                    <div style={stylesFont} >{movimentacao.category}</div>   
+                                    <div style={stylesFont} >{movimentacao.nome}</div>   
                                     <input
                                       // InputProps={{ disableUnderline: true }}
                                       style={inputStyle}
@@ -532,7 +534,7 @@ class CriarExercicio extends Component {
 
 
 
-                              {movimentacao.attribute == "quantitativo" ? 
+                              {movimentacao.atributo == "quantitativo" ? 
 
 
                                 <TableCell style={styleTableCell} className="px-0" align="left" colSpan={2}>
@@ -566,7 +568,7 @@ class CriarExercicio extends Component {
                               }
 
 
-                              {movimentacao.is_father == null ? 
+                              {movimentacao.isPlanoContasUsuario ? 
                                 
                                 <TableCell className="px-0 capitalize" colSpan={4} align="left" colSpan={1}>
                                   -
@@ -636,7 +638,7 @@ const inputStyle = {
 }
 
 
-CriarExercicio.propTypes = {
+ExerciseStore.propTypes = {
   user: PropTypes.object.isRequired,
 };
 
@@ -650,6 +652,6 @@ const mapStateToProps = state => ({
 export default withStyles({}, { withTheme: true })(
   withRouter(
     connect(mapStateToProps, {
-    })(CriarExercicio)
+    })(ExerciseStore)
   )
 );
