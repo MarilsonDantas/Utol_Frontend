@@ -60,6 +60,7 @@ const BalanceteQuantitativo = props => {
                 <TableHead>
                     <TableRow>
                         <TableCell className="px-0" align="left">Conta</TableCell>
+                        <TableCell className="px-0" align="center">Quantidade Inicial</TableCell>
                         <TableCell className="px-0" align="center">Saldo Anterior</TableCell>
                         <TableCell className="px-0" align="center">Quantidade</TableCell>
                         <TableCell className="px-0" align="center">Saldo Final</TableCell>
@@ -73,10 +74,21 @@ const BalanceteQuantitativo = props => {
                             <Fragment>
                                 {release.attribute == 'quantitativo' ? 
 
-                                <TableRow >
+                                <TableRow>
                                     <TableCell className="px-0 capitalize" align="left">
                                         {release.category}
                                     </TableCell>
+
+                                    {release.initial_amount_default > 0 ? 
+                                        <TableCell className="px-0 capitalize" align="center">
+                                            <span style={{color: '#1b832d'}}>{release.initial_amount_default}</span>
+                                        </TableCell> 
+                                    :
+                                        <TableCell className="px-0 capitalize" align="center" style={{color: '#555'}}>
+                                            <span style={{color: '#F44336'}}>{release.initial_amount_default}</span>
+                                        </TableCell>
+                                    }
+
                                     <TableCell className="px-0 capitalize" align="center">
                                         {release.initial_amount}
                                     </TableCell>

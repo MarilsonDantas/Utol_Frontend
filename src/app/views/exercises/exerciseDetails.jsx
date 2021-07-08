@@ -69,7 +69,7 @@ const ExerciseDetails = props => {
         </SimpleCard>
       </div>
       
-      <Grid container style={{display: 'flex', justifyContent: 'space-between'}} lg={12} md={12} xs={12} spacing={1}>
+      <Grid container style={{display: 'flex', justifyContent: 'space-between'}} spacing={1}>
 
         <Grid item lg={6} md={6} sm={12} xs={12}>
           <SimpleCard >
