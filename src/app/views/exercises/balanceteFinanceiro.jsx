@@ -102,11 +102,12 @@ const useTreeItemStyles = makeStyles((theme) => ({
     const [releases, setReleases] = useState([]);
 
     const id_exercise = props.id_exercise;
-    
+    const id_class = props.id_class;
+
     useEffect(()=>{
         async function loadReleases(){
             if (nodeIdAtual != undefined) {
-                const result = await api.get(`getReleasesByCategorieExercise/${nodeIdAtual}/${id_exercise}}`);
+                const result = await api.get(`getReleasesByCategorieExercise/${nodeIdAtual}/${id_exercise}/${id_class}`);
                 setReleases(result.data);
             }
         }
@@ -185,7 +186,7 @@ const useTreeItemStyles = makeStyles((theme) => ({
                 <Table className="whitespace-pre">
                     <TableHead>
                         <TableRow>
-                            <TableCell className="px-0" style={{textAlign: 'left'}}>Exercício</TableCell>
+                            <TableCell className="px-0" style={{textAlign: 'left'}}>Atividade</TableCell>
                             <TableCell className="px-0" style={{textAlign: 'center'}}>Tipo da movimentação</TableCell>
                             <TableCell className="px-0" style={{textAlign: 'center'}}>Valor</TableCell>
                         </TableRow>
@@ -194,7 +195,7 @@ const useTreeItemStyles = makeStyles((theme) => ({
                         {releases[0].initial_value != undefined && releases[0].initial_value != 0 ? 
                           <TableRow>
                               <TableCell className="px-0 capitalize" align="left">
-                                {releases[0].nomeExercicio}
+                                {releases[0].nomeExercicio ? releases[0].nomeExercicio : "Padrão"}
                               </TableCell>
                               <TableCell className="px-0 capitalize" align="center">
                                 Valor Inicial
@@ -207,7 +208,7 @@ const useTreeItemStyles = makeStyles((theme) => ({
                         {releases.map((release, index) =>                    
                             <TableRow>
                                 <TableCell className="px-0 capitalize" align="left">
-                                  {release.nomeExercicio}
+                                  {release.nomeExercicio ? release.nomeExercicio : "Padrão"}
                                 </TableCell>
 
                                 <TableCell className="px-0 capitalize" align="center">
@@ -295,6 +296,7 @@ const BalanceteFinanceiro = props => {
             color="#3B5998"
             bgColor="#e8f0fe"
             id_exercise={id_exercise}
+            id_class={id_class}
         >
           {Array.isArray(balancoPatrimonial.children) ? balancoPatrimonial.children.map((node) => renderTree(node)) : null}
         </StyledTreeItem>
