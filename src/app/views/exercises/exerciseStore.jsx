@@ -24,8 +24,12 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Snackbar,
+  SnackbarContent,
 } from "@material-ui/core";
+
+import MuiAlert from '@material-ui/lab/Alert';
 
 import "date-fns";
 import { Autocomplete } from "@material-ui/lab";
@@ -34,7 +38,11 @@ import api from "../../services/api";
 import { Fragment } from "react";
 
 class CriarExercicio extends Component {
+  
   state = {
+    openSnackBar: false,
+    negativeBalance: true,
+
     nome: "",
     idaula: this.props.match.params.id_class,
     descricao: "",
@@ -51,7 +59,7 @@ class CriarExercicio extends Component {
 
     
     nomeContaDebito: "",
-    valorDebito: 0,
+    valorDebito: "",
     quantidadeDebito: 1,
     valorInicialDebito: 0,
     quantidadeInicialDebito: 0,
@@ -59,7 +67,7 @@ class CriarExercicio extends Component {
 
 
     nomeContaCredito: "",
-    valorCredito: 0,
+    valorCredito: "",
     quantidadeCredito: 1,
     valorInicialCredito: 0,
     quantidadeInicialCredito: 0,
@@ -75,10 +83,14 @@ class CriarExercicio extends Component {
 
     const contasAula = await api.get(`getCategoriesByClass/${this.props.match.params.id_class}`);
 
+    if (contasAula.data.negativeBalance == 0) {
+      this.setState({negativeBalance: 0});
+    }
+
     var contasDebitoArray = [];
     var contasCreditoArray = [];
 
-    contasAula.data.forEach(conta => {
+    contasAula.data.plano_contas.forEach(conta => {
       if (conta.type == 'D') {
         contasDebitoArray.push(conta);
       }        
@@ -92,7 +104,6 @@ class CriarExercicio extends Component {
 
     this.setState({contasDebito: resultDebito});
     this.setState({contasCredito: resultCredito});
-
   }
 
   handleChange = (e) => {
@@ -109,16 +120,20 @@ class CriarExercicio extends Component {
       idprofessor_responsavel,
       movimentacaoCredito,
       movimentacaoDebito,
-      nome
+      nome,
+      negativeBalance
     } = this.state;
 
-    let dadosExercicio = {descricao,
-    historico,
-    idaula,
-    idprofessor_responsavel,
-    movimentacaoCredito,
-    movimentacaoDebito,
-    nome};
+    let dadosExercicio = {
+      descricao,
+      historico,
+      idaula,
+      idprofessor_responsavel,
+      movimentacaoCredito,
+      movimentacaoDebito,
+      nome,
+      negativeBalance
+    };
 
     dadosExercicio.usuario_inclusao = this.props.user.idusuario;
     dadosExercicio.idprofessor_responsavel = this.props.user.idusuario;
@@ -126,19 +141,13 @@ class CriarExercicio extends Component {
     delete dadosExercicio.contasCredito;
     delete dadosExercicio.contasDebito;
 
-    console.log("dadosExercicio ->>>", dadosExercicio);
-
     const response = await api.post('storeExercicio', dadosExercicio);
     
-    // console.log(response); 
-    // if (response.data == true){
-      // this.props.history.push("/dashboard/detalhesExercicio", {exercicio: dadosExercicio, usuario: this.props.user});
-    // }
-    // console.log("id aula", id_class);
-    // this.props.history.push(`/aula/${this.props.match.params.id_class}`);
-    // console.log("props", this.props.user);
-
-    this.props.history.push(`/aula/${this.props.match.params.id_class}`);
+    if (response.data == "error") {
+      this.setState({openSnackBar: true});
+    } else {
+      this.props.history.push(`/aula/${this.props.match.params.id_class}`);
+    }
 
   };
 
@@ -159,7 +168,12 @@ class CriarExercicio extends Component {
           metricaDebito: this.state.metricaDebito
         }
       ],
-      modalDebitoOpen: false
+      modalDebitoOpen: false,
+      nomeContaDebito: "",
+      valorDebito: "",
+      quantidadeDebito: 1,
+      valorInicialDebito: 0,
+      quantidadeInicialDebito: 0,
     });
 
     var valorConta = 0;
@@ -185,8 +199,6 @@ class CriarExercicio extends Component {
       this.setState({totalDebito: valorConta});
     }
 
-    console.log("movimentacaoDebito", this.state.movimentacaoCredito);
-
   };
 
   handleCreditoReleaseSubmit = async (categoryValue, e) => {
@@ -203,11 +215,16 @@ class CriarExercicio extends Component {
           quantidadeCredito: this.state.quantidadeCredito,
           valorInicialCredito: this.state.valorInicialCredito,
           quantidadeInicialCredito: this.state.quantidadeInicialCredito,
-          metricaCredito: this.state.metricaCredito
-
+          metricaCredito: this.state.metricaCredito,          
         }
       ],
-      modalCreditoOpen: false
+      modalCreditoOpen: false,
+
+      nomeContaCredito: "",
+      valorCredito: "",
+      quantidadeCredito: 1,
+      valorInicialCredito: 0,
+      quantidadeInicialCredito: 0,
     });
     
     var valorConta = 0;
@@ -229,11 +246,9 @@ class CriarExercicio extends Component {
 
     valorConta = movimentacoesPassadas.reduce((a, b) => a + b, 0);
 
-    if (valorConta != 0){          
+    if (valorConta != 0){
       this.setState({totalCredito: valorConta});
     }
-
-    console.log("movimentacaoCredito", this.state.movimentacaoCredito);
 
   };
  
@@ -278,9 +293,17 @@ class CriarExercicio extends Component {
       metricaCredito: values.label
     });
   }
+
+  handleSnackBarClose = () => {
+    this.setState({
+      openSnackBar: !this.state.openSnackBar
+    });
+  }
   
   render() {
     let {
+      openSnackBar,
+
       nome,
       descricao,
       contasDebito,
@@ -293,7 +316,15 @@ class CriarExercicio extends Component {
       modalDebitoOpen,
       modalCreditoOpen,
       categoryValue,
-      totalAux
+      totalAux,
+
+      nomeContaDebito,
+      valorDebito,
+      quantidadeDebito,
+
+      nomeContaCredito,
+      valorCredito,
+      quantidadeCredito
     } = this.state;
 
     return (
@@ -316,7 +347,6 @@ class CriarExercicio extends Component {
             ref="form"
             onSubmit={this.handleSubmit}
             onChange={this.handleChange}
-            onError={errors => null}
           >
             <Grid container spacing={6}>
               <Grid item lg={12} md={12} sm={12} xs={12}>
@@ -326,6 +356,10 @@ class CriarExercicio extends Component {
                   type="text"
                   name="nome"
                   value={nome}
+                  validators={[
+                    "required",
+                  ]}
+                  errorMessages={["O título é obrigatório."]}
                 />
               </Grid>
             </Grid>
@@ -337,6 +371,10 @@ class CriarExercicio extends Component {
                   type="text"
                   name="descricao"
                   value={descricao}
+                  validators={[
+                    "required",
+                  ]}
+                  errorMessages={["A descrição é obrigatória."]}
                 />
             </Grid>
 
@@ -354,7 +392,7 @@ class CriarExercicio extends Component {
 
             <Grid container style={{flexDirection: 'row', justifyContent: 'space-between'}} item lg={12} md={12} sm={12} xs={12} spacing={6}>
 
-               {/* CONTA DÉBITO */}
+               {/* LISTA CONTA DÉBITO */}
               <Grid item lg={6} md={6} sm={12} xs={12}>   
                 <Grid container style={{flexDirection: 'row', justifyContent: 'space-between'}} spacing={1} item>
 
@@ -430,14 +468,14 @@ class CriarExercicio extends Component {
                                 
                                 : 
                                 
-                                <TableCell style={styleTableCell} className="px-0 capitalize" colSpan={2} align="left">
+                                <TableCell className="px-0 capitalize" colSpan={2} align="left">
                                   {movimentacao.nomeContaDebito}
                                 </TableCell>
                               }
 
                                 
                               {/* VALOR UNITÁRIO */}
-                              <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                              <TableCell className="px-0" align="center" colSpan={1}>
                                 {movimentacao.valorDebito}
                               </TableCell>
 
@@ -445,13 +483,13 @@ class CriarExercicio extends Component {
                               {movimentacao.attribute == "quantitativo" ? 
 
 
-                                <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                                <TableCell className="px-0" align="center" colSpan={1}>
                                   {movimentacao.quantidadeDebito}
                                 </TableCell>
 
                               : 
                                                               
-                                <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                                <TableCell className="px-0" align="center" colSpan={1}>
                                   -
                                 </TableCell>
                               }
@@ -465,7 +503,7 @@ class CriarExercicio extends Component {
                                 
                                 : 
                                 <Fragment>
-                                  <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                                  <TableCell className="px-0" align="center" colSpan={1}>
                                     {movimentacao.metricaDebito}
                                   </TableCell>
                                 </Fragment>
@@ -473,12 +511,12 @@ class CriarExercicio extends Component {
                               }
 
                               {/* VALOR INICIAL */}
-                              <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                              <TableCell className="px-0" align="center" colSpan={1}>
                                 {movimentacao.valorInicialDebito}
                               </TableCell>
 
                               {/* QUANTIDADE INICIAL */}
-                              <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                              <TableCell className="px-0" align="center" colSpan={1}>
                                 {movimentacao.quantidadeInicialDebito}
                               </TableCell>
 
@@ -499,7 +537,7 @@ class CriarExercicio extends Component {
               </Grid>
 
 
-              {/* CONTA CRÉDITO */}
+              {/* LISTA CONTA CRÉDITO */}
               <Grid item lg={6} md={6} sm={12} xs={12}>                  
                 <Grid container style={{flexDirection: 'row', justifyContent: 'space-between'}} spacing={1}>
 
@@ -575,14 +613,14 @@ class CriarExercicio extends Component {
                               
                               : 
                               
-                              <TableCell style={styleTableCell} className="px-0 capitalize" colSpan={2} align="left">
+                              <TableCell className="px-0 capitalize" colSpan={2} align="left">
                                 {movimentacao.nomeContaCredito}
                               </TableCell>
                             }
 
                               
                             {/* VALOR UNITÁRIO */}
-                            <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                            <TableCell className="px-0" align="center" colSpan={1}>
                               {movimentacao.valorCredito}
                             </TableCell>
 
@@ -590,13 +628,13 @@ class CriarExercicio extends Component {
                             {movimentacao.attribute == "quantitativo" ? 
 
 
-                              <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                              <TableCell className="px-0" align="center" colSpan={1}>
                                 {movimentacao.quantidadeCredito}
                               </TableCell>
 
                             : 
                                                             
-                              <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                              <TableCell className="px-0" align="center" colSpan={1}>
                                 -
                               </TableCell>
                             }
@@ -610,7 +648,7 @@ class CriarExercicio extends Component {
                               
                               : 
                               <Fragment>
-                                <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                                <TableCell className="px-0" align="center" colSpan={1}>
                                   {movimentacao.metricaCredito}
                                 </TableCell>
                               </Fragment>
@@ -618,12 +656,12 @@ class CriarExercicio extends Component {
                             }
 
                             {/* VALOR INICIAL */}
-                            <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                            <TableCell className="px-0" align="center" colSpan={1}>
                               {movimentacao.valorInicialCredito}
                             </TableCell>
 
                             {/* QUANTIDADE INICIAL */}
-                            <TableCell style={styleTableCell} className="px-0" align="center" colSpan={1}>
+                            <TableCell className="px-0" align="center" colSpan={1}>
                               {movimentacao.quantidadeInicialCredito}
                             </TableCell>
 
@@ -644,7 +682,7 @@ class CriarExercicio extends Component {
 
             </Grid>  
                         
-            <Button color="primary" variant="contained" onClick={(event)=>{this.handleSubmit(event)}}>
+            <Button color="primary" variant="contained" type="submit">
               <Icon>send</Icon>
               <span className="pl-2 capitalize">Criar Exercício</span>
             </Button>
@@ -660,7 +698,7 @@ class CriarExercicio extends Component {
           aria-labelledby="form-dialog-title"
         >
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}} >
-            <DialogTitle id="form-dialog-title">{categoryValue.category}</DialogTitle>
+            <DialogTitle id="form-dialog-title">Movimentação Débito - {categoryValue.category}</DialogTitle>
             <TextField
               style={{marginTop: '15px', maxWidth: '150px', marginRight: '16px', padding: 0}}
               value={totalAux}
@@ -673,8 +711,7 @@ class CriarExercicio extends Component {
 
           <ValidatorForm
             ref="form"
-            onSubmit={(event) => {this.handleDebitoReleaseSubmit(categoryValue, event); console.log("debito modal");}}
-            onError={errors => null}
+            onSubmit={(event) => {this.handleDebitoReleaseSubmit(categoryValue, event)}}
           > 
 
             {categoryValue.is_father ?
@@ -691,7 +728,7 @@ class CriarExercicio extends Component {
                   <>
                   {categoryValue.attribute == "quantitativo" ? 
                     <Grid item lg={5} md={5} sm={12} xs={12} style={{marginTop: '5px', }} >
-                      <TextField
+                      <TextValidator
                         autoFocus
                         variant="outlined"
                         label="Nome da conta"
@@ -699,11 +736,16 @@ class CriarExercicio extends Component {
                         fullWidth
                         name="nomeContaDebito"
                         onChange={(event) => {this.handleChange(event)}}
+                        value={nomeContaDebito}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["O nome da conta é obrigatório."]}
                       />
                     </Grid>
                   : 
                     <Grid item lg={7} md={7} sm={12} xs={12} style={{marginTop: '5px', }} >
-                      <TextField
+                      <TextValidator
                         autoFocus
                         variant="outlined"
                         label="Nome da conta"
@@ -711,6 +753,11 @@ class CriarExercicio extends Component {
                         fullWidth
                         name="nomeContaDebito"
                         onChange={(event) => {this.handleChange(event)}}
+                        value={nomeContaDebito}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["O nome da conta é obrigatório."]}
                       />
                     </Grid>
                   }
@@ -730,24 +777,34 @@ class CriarExercicio extends Component {
                 {categoryValue.attribute == "quantitativo" ?
                   <>
                     <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
-                      <TextField
+                      <TextValidator
                         variant="outlined"
                         name="valorDebito"
                         label="Valor"
                         type="text"
                         fullWidth
+                        value={valorDebito}
                         onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeDebito * event.target.value) });}}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["Digite um valor."]}
                       />
                     </Grid>
 
                     <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', }} >
-                      <TextField
+                      <TextValidator
                         variant="outlined"
                         name="quantidadeDebito"
                         label="Quantidade"
                         type="text"
                         fullWidth
+                        value={quantidadeDebito}
                         onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.valorDebito * event.target.value) });}}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["Obrigatório."]}                        
                       />
                     </Grid>
                   </>
@@ -755,13 +812,18 @@ class CriarExercicio extends Component {
                   :
 
                   <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
-                    <TextField
+                    <TextValidator
                       variant="outlined"
                       name="valorDebito"
                       label="Valor"
                       type="text"
                       fullWidth
+                      value={valorDebito}
                       onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeDebito * event.target.value) });}}
+                      validators={[
+                        "required",
+                      ]}
+                      errorMessages={["Digite um valor."]}
                     />
                   </Grid>
                 }
@@ -776,52 +838,54 @@ class CriarExercicio extends Component {
 
                 <Grid container style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px', marginBottom: '0px', marginRight: '16px', marginLeft: '16px'}}>
 
-                  <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }}>
 
                     {categoryValue.attribute == 'financeiro' ? 
-                      <Autocomplete
-                        className="mb-6 w-full"
-                        defaultValue={{ label: 'Financeiro' }}
-                        options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
-                        onChange={this.onTagsChangeDebito}
-                        className="tipo"
-                        getOptionLabel={option => option.label}
-                        disabled={true}
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label={"Métrica"}
-                            variant="outlined"
-                            fullWidth
-                          />
-                        )}
-                      />
-                      
-                      :
+                      <Grid item lg={7} md={7} sm={12} xs={12} style={{marginTop: '5px' }}>
 
-                      <Autocomplete
-                        className="mb-6 w-full"
-                        closeIcon={false}
-                        options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
-                        onChange={this.onTagsChangeDebito}
-                        className="tipo"
-                        getOptionLabel={option => option.label}
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label={"Métrica"}
-                            variant="outlined"
-                            fullWidth
-                          />
-                        )}
-                      />                    
+                        <Autocomplete
+                          className="mb-6 w-full"
+                          defaultValue={{ label: 'Financeiro' }}
+                          options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
+                          onChange={this.onTagsChangeDebito}
+                          className="tipo"
+                          getOptionLabel={option => option.label}
+                          disabled={true}
+                          renderInput={params => (
+                            <TextField
+                              {...params}
+                              label={"Métrica"}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          )}
+                        />
+                      </Grid>
+                      :
+                      <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px' }}>
+                        <Autocomplete
+                          className="mb-6 w-full"
+                          closeIcon={false}
+                          options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
+                          onChange={this.onTagsChangeDebito}
+                          className="tipo"
+                          getOptionLabel={option => option.label}
+                          renderInput={params => (
+                            <TextField
+                              {...params}
+                              label={"Métrica"}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          )}
+                        />  
+                      </Grid>                  
                     }
 
                    
-                  </Grid>
+                  
 
                   <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }} >
-                    <TextField
+                    <TextValidator
                       variant="outlined"
                       name="valorInicialDebito"
                       label="Valor de saldo inicial"
@@ -831,8 +895,10 @@ class CriarExercicio extends Component {
                     />
                   </Grid>
 
+                  {categoryValue.attribute == "quantitativo" && 
+
                   <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
-                    <TextField
+                    <TextValidator
                       variant="outlined"
                       name="quantidadeInicialDebito"
                       label="Quantidade inicial"
@@ -841,7 +907,7 @@ class CriarExercicio extends Component {
                       onChange={(event) => {this.handleChange(event)}}
                     />
                   </Grid>
-
+                  }
                   
                 </Grid>
               }
@@ -872,7 +938,7 @@ class CriarExercicio extends Component {
           aria-labelledby="form-dialog-title"
         >
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}} >
-            <DialogTitle id="form-dialog-title">{categoryValue.category} - Credito</DialogTitle>
+            <DialogTitle id="form-dialog-title">Movimentação Credito - {categoryValue.category}</DialogTitle>
             <TextField
               style={{marginTop: '15px', maxWidth: '150px', marginRight: '16px', padding: 0}}
               value={totalAux}
@@ -903,7 +969,7 @@ class CriarExercicio extends Component {
                   <>
                   {categoryValue.attribute == "quantitativo" ? 
                     <Grid item lg={5} md={5} sm={12} xs={12} style={{marginTop: '5px', }} >
-                      <TextField
+                      <TextValidator
                         autoFocus
                         variant="outlined"
                         label="Nome da conta"
@@ -911,11 +977,16 @@ class CriarExercicio extends Component {
                         fullWidth
                         name="nomeContaCredito"
                         onChange={(event) => {this.handleChange(event)}}
+                        value={nomeContaCredito}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["O nome da conta é obrigatório."]}
                       />
                     </Grid>
                   : 
                     <Grid item lg={7} md={7} sm={12} xs={12} style={{marginTop: '5px', }} >
-                      <TextField
+                      <TextValidator
                         autoFocus
                         variant="outlined"
                         label="Nome da conta"
@@ -923,6 +994,11 @@ class CriarExercicio extends Component {
                         fullWidth
                         name="nomeContaCredito"
                         onChange={(event) => {this.handleChange(event)}}
+                        value={nomeContaCredito}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["O nome da conta é obrigatório."]}
                       />
                     </Grid>
                   }
@@ -942,24 +1018,34 @@ class CriarExercicio extends Component {
                 {categoryValue.attribute == "quantitativo" ?
                   <>
                     <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
-                      <TextField
+                      <TextValidator
                         variant="outlined"
                         name="valorCredito"
                         label="Valor"
                         type="text"
                         fullWidth
                         onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeCredito * event.target.value) });}}
+                        value={valorCredito}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["Digite um valor."]}
                       />
                     </Grid>
 
                     <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', }} >
-                      <TextField
+                      <TextValidator
                         variant="outlined"
                         name="quantidadeCredito"
                         label="Quantidade"
                         type="text"
                         fullWidth
                         onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.valorCredito * event.target.value) });}}
+                        value={quantidadeCredito}
+                        validators={[
+                          "required",
+                        ]}
+                        errorMessages={["Obrigatório."]}                        
                       />
                     </Grid>
                   </>
@@ -967,13 +1053,18 @@ class CriarExercicio extends Component {
                   :
 
                   <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
-                    <TextField
+                    <TextValidator
                       variant="outlined"
                       name="valorCredito"
                       label="Valor"
                       type="text"
                       fullWidth
                       onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeCredito * event.target.value) });}}
+                      value={valorCredito}
+                      validators={[
+                        "required",
+                      ]}
+                      errorMessages={["Digite um valor."]}
                     />
                   </Grid>
                 }
@@ -1007,7 +1098,7 @@ class CriarExercicio extends Component {
                   </Grid>
 
                   <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }} >
-                    <TextField
+                    <TextValidator
                       variant="outlined"
                       name="valorInicialCredito"
                       label="Valor de saldo inicial"
@@ -1018,7 +1109,7 @@ class CriarExercicio extends Component {
                   </Grid>
 
                   <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
-                    <TextField
+                    <TextValidator
                       variant="outlined"
                       name="quantidadeInicialCredito"
                       label="Quantidade inicial"
@@ -1047,6 +1138,12 @@ class CriarExercicio extends Component {
 
         </Dialog>
 
+        <Snackbar open={openSnackBar} autoHideDuration={6000} onClose={this.handleSnackBarClose}>          
+          <MuiAlert elevation={6} variant="filled" onClose={this.handleSnackBarClose} severity="warning">
+            Saldo negativo em saldo ou quantidade não é permitido.
+          </MuiAlert>
+        </Snackbar>
+
       </div>
 
 
@@ -1054,28 +1151,6 @@ class CriarExercicio extends Component {
     );
   }
 }
-
-const styleTableCell = {
-  // verticalAlign: 'bottom'
-};
-
-const stylesFont = {
-  fontSize: '13px',
-  color: '#333'
-};
-
-const movimentacaoColumnStyle = {
-  display: 'flex', 
-  flexDirection: 'column' 
-}
-
-const inputStyle = {
-  border: '1px solid #cecece', 
-  borderRadius: 3, 
-  padding: 5, 
-  width: '80%' 
-}
-
 
 CriarExercicio.propTypes = {
   user: PropTypes.object.isRequired,

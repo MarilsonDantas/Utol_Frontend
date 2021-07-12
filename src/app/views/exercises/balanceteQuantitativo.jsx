@@ -64,6 +64,7 @@ const BalanceteQuantitativo = props => {
                         <TableCell className="px-0" align="center">Saldo Anterior</TableCell>
                         <TableCell className="px-0" align="center">Quantidade</TableCell>
                         <TableCell className="px-0" align="center">Saldo Final</TableCell>
+                        <TableCell className="px-0" align="center">Métrica</TableCell>
                     </TableRow>
                 </TableHead>
 
@@ -104,6 +105,10 @@ const BalanceteQuantitativo = props => {
                                         }
                                     <TableCell className="px-0 capitalize" align="center">
                                         {release.final_amount}
+                                    </TableCell>
+
+                                    <TableCell className="px-0 capitalize" align="center">
+                                        {release.metric}
                                     </TableCell>
                                 </TableRow>
                                 : ''

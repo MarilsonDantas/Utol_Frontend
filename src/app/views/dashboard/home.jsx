@@ -28,7 +28,7 @@ class Dashboard1 extends Component {
 
   async componentDidMount(){
 
-    const cursos = null;
+    let cursos = null;
 
     if (this.props.user.idprofessor) {
       cursos = await api.get(`getCursos/${this.props.user.idprofessor}`);
