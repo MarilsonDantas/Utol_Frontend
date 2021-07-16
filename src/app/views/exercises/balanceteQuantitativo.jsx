@@ -1,4 +1,5 @@
 import React, { Component, Fragment, useEffect, useState } from "react";
+import { makeStyles } from '@material-ui/core/styles';
 
 import { 
   Grid, 
@@ -19,8 +20,10 @@ import { withStyles } from "@material-ui/styles";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
+import Paper from '@material-ui/core/Paper';
 
-import api from "../../services/api";
+import api from "../../services/api";  
+
 
 const BalanceteQuantitativo = props => {
   
@@ -40,80 +43,173 @@ const BalanceteQuantitativo = props => {
         loadBalancoPatrimonial();
     }, []);
 
+    const table_title = {
+        fontWeight: 'bold'
+    };
+
+    const table_title_main = {
+        fontWeight: 'bold',
+        fontSize: '16px'
+    }
+
     return (
         <div className="m-sm-30" >
 
         <div className="mb-sm-30">
           <Breadcrumb
             routeSegments={[
-              { name: "Meus Cursos", path: "/dashboard/analytics" },
-              { name: "Detalhes de curso", path: "/dashboard/detalhesCurso" },
-              { name: "Detalhes de aula", path: "/dashboard/detalhesAula" },
-              { name: "Detalhes de exercício", path: "/exercicio/detalhesAula" },
+              { name: "Meus Cursos", path: "#" },
+              { name: "Detalhes de curso", path: "#"  },
+              { name: "Detalhes de aula", path: "#"  },
+              { name: "Detalhes de exercício", path: "#"  },
               { name: "Balancete Quantitativo" }
             ]}
           />
         </div>
 
         <SimpleCard title="Balancete Quantitativo">
+
+            <label>Ordenado por categoria em ordem alfabética.</label>
+            
             <Table>
                 <TableHead>
-                    <TableRow>
-                        <TableCell className="px-0" align="left">Conta</TableCell>
-                        <TableCell className="px-0" align="center">Quantidade Inicial</TableCell>
-                        <TableCell className="px-0" align="center">Saldo Anterior</TableCell>
-                        <TableCell className="px-0" align="center">Quantidade</TableCell>
-                        <TableCell className="px-0" align="center">Saldo Final</TableCell>
-                        <TableCell className="px-0" align="center">Métrica</TableCell>
+                    <TableRow >
+                        <TableCell colSpan={2} style={table_title_main}></TableCell>
+                        <TableCell align="center" colSpan={2} style={table_title_main}>Saldo inicial</TableCell>
+                        <TableCell align="center" colSpan={2} style={table_title_main}>Débito</TableCell>
+                        <TableCell align="center" colSpan={2} style={table_title_main}>Crédito</TableCell>
+                        <TableCell align="center" colSpan={2} style={table_title_main}>Saldo final</TableCell>
                     </TableRow>
                 </TableHead>
 
                 <TableBody>
+                    
+                    <TableRow>
+                        <TableCell style={table_title}>Exercicio</TableCell>
+
+                        <TableCell style={table_title}>Conta</TableCell>
+                        <TableCell align="center" style={table_title}>Quant. Inicial</TableCell>
+                        <TableCell align="center" style={table_title}>Valor Inicial</TableCell>
+                        <TableCell align="center" style={table_title}>Quantidade</TableCell>
+                        <TableCell align="center" style={table_title}>Valor</TableCell>
+                        <TableCell align="center" style={table_title}>Quantidade</TableCell>
+                        <TableCell align="center" style={table_title}>Valor</TableCell>
+                        <TableCell align="center" style={table_title}>Quantidade</TableCell>
+                        <TableCell align="center" style={table_title}>Valor</TableCell>
+                    </TableRow>
+
                     {releases.length > 0 ? 
                     <Fragment>
                         {releases.map((release, index) =>
                             <Fragment>
-                                {release.attribute == 'quantitativo' ? 
+
+                            {release.attribute == "quantitativo" && 
 
                                 <TableRow>
+
+                                    {/* CONTA */}
                                     <TableCell className="px-0 capitalize" align="left">
-                                        {release.category}
+                                        {release.nome_exercicio} 
                                     </TableCell>
 
-                                    {release.initial_amount_default > 0 ? 
+                                    {/* CONTA */}
+                                    <TableCell className="px-0 capitalize" align="left">
+                                        {release.category} ({release.metric})
+                                    </TableCell>
+
+                                    {/* QUANTIDADE INICIAL */}
+                                    {release.attribute == "financeiro" ? 
                                         <TableCell className="px-0 capitalize" align="center">
-                                            <span style={{color: '#1b832d'}}>{release.initial_amount_default}</span>
+                                            <span> - </span>
                                         </TableCell> 
                                     :
+                                        <>
+                                        {release.initial_amount >= 0 ? 
+                                            <TableCell className="px-0 capitalize" align="center">
+                                                <span style={{color: '#1b832d'}}>{release.initial_amount}</span>
+                                            </TableCell> 
+                                            :
+                                            <TableCell className="px-0 capitalize" align="center" style={{color: '#555'}}>
+                                                <span style={{color: '#F44336'}}>{release.initial_amount}</span>
+                                            </TableCell>
+                                        }
+                                        </>
+                                    }
+                                
+                                    {/* VALOR INICIAL */}
+                                    {release.initial_value >= 0 ? 
+                                        <TableCell className="px-0 capitalize" align="center">
+                                            <span style={{color: '#1b832d'}}>{release.initial_value}</span>
+                                        </TableCell> 
+                                        :
                                         <TableCell className="px-0 capitalize" align="center" style={{color: '#555'}}>
-                                            <span style={{color: '#F44336'}}>{release.initial_amount_default}</span>
+                                            <span style={{color: '#F44336'}}>{release.initial_value}</span>
                                         </TableCell>
                                     }
 
-                                    <TableCell className="px-0 capitalize" align="center">
-                                        {release.initial_amount}
-                                    </TableCell>
+                                    {/* QUANTIDADE/VALOR DÉBITO */}
+                                    {release.release_type == "D" ? 
+                                    <>
+                                        {/* QUANTIDADE DÉBITO */}
+                                        <TableCell className="px-0 capitalize" align="center">
+                                            <span style={{color: release.color}}>{release.amount}</span>
+                                        </TableCell> 
 
-                                        {release.isSum ? 
-                                            <TableCell className="px-0 capitalize" align="center">
-                                                <span style={{color: '#1b832d'}}>+ {release.amount}</span>
-                                            </TableCell> 
-                                        :
+                                        {/* VALOR DÉBITO */}
+                                        <TableCell className="px-0 capitalize" align="center">
+                                            <span style={{color: release.color}}>{release.value}</span>
+                                        </TableCell> 
+                                    </>                                       
+                                    :   
+                                        <>
                                             <TableCell className="px-0 capitalize" align="center" style={{color: '#555'}}>
-                                                <span style={{color: '#F44336'}}>- {release.amount}</span>
+                                                -
                                             </TableCell>
-                                        }
+
+                                            <TableCell className="px-0 capitalize" align="center" style={{color: '#555'}}>
+                                                -
+                                            </TableCell>
+                                        </>
+                                    }
+
+                                    {/* QUANTIDADE/VALOR CRÉDITO */}
+                                    {release.release_type == "C" ? 
+                                    <>
+                                        {/* QUANTIDADE CRÉDITO */}
+                                        <TableCell className="px-0 capitalize" align="center">
+                                            <span style={{color: release.color}}>{release.amount}</span>
+                                        </TableCell> 
+
+                                        {/* VALOR DÉBITO */}
+                                        <TableCell className="px-0 capitalize" align="center">
+                                            <span style={{color: release.color}}>{release.value}</span>
+                                        </TableCell> 
+                                    </>                                       
+                                    :   
+                                        <>
+                                            <TableCell className="px-0 capitalize" align="center" style={{color: '#555'}}>
+                                                -
+                                            </TableCell>
+
+                                            <TableCell className="px-0 capitalize" align="center" style={{color: '#555'}}>
+                                                -
+                                            </TableCell>
+                                        </>
+                                    }
+
                                     <TableCell className="px-0 capitalize" align="center">
                                         {release.final_amount}
                                     </TableCell>
 
                                     <TableCell className="px-0 capitalize" align="center">
-                                        {release.metric}
+                                        {release.final_value}
                                     </TableCell>
                                 </TableRow>
-                                : ''
-                                }
-                            </Fragment>            
+                                
+                        
+                            }
+                            
+                            </Fragment>   
                             
                         )}  
 
@@ -123,11 +219,12 @@ const BalanceteQuantitativo = props => {
 
                     ''
                     }
+
                     
-            
                 </TableBody>
             </Table>
-            </SimpleCard>
+        
+        </SimpleCard>
 
         
       </div>

@@ -289,7 +289,7 @@ const BalanceteFinanceiro = props => {
         <StyledTreeItem key={balancoPatrimonial.id} 
             nodeId={balancoPatrimonial.id}
             category={balancoPatrimonial.category}
-            total={balancoPatrimonial.sumOfTheChildren + balancoPatrimonial.initial_value}
+            total={balancoPatrimonial.sumOfTheChildren + (balancoPatrimonial.initial_value * balancoPatrimonial.initial_amount)}
             preview_value={balancoPatrimonial.preview_value}
             debito_value={balancoPatrimonial.debito_value}
             credito_value={balancoPatrimonial.credito_value}
@@ -320,7 +320,7 @@ const BalanceteFinanceiro = props => {
         <SimpleCard title="Balancete Financeiro">
           <div>
 
-            <Grid container style={{flexDirection: 'row', justifyContent: 'space-between', height: '600px'}} lg={12} md={12} sm={12} xs={12} spacing={6} className="overflow-auto">
+            <Grid container style={{flexDirection: 'row', justifyContent: 'space-between', height: '600px', marginTop: '10px'}} lg={12} md={12} sm={12} xs={12} spacing={6} className="overflow-auto">
 
                 <Grid item lg={6} md={6} sm={12} xs={12}>   
                     <div style={{maxWidth: '600px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10}}>

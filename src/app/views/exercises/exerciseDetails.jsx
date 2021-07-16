@@ -31,7 +31,7 @@ const ExerciseDetails = props => {
     async function loadMovimentacoes() {
 
       const movimentacoesResult = await api.get(`getReleasesByExercicio/${id_exercise}`);
-      console.log(movimentacoesResult.data);
+      
       setMovimentacoes(movimentacoesResult.data);
       setExercicio({nome_exercicio: movimentacoesResult.data[0].nome_exercicio, descricao_exercicio: movimentacoesResult.data[0].descricao_exercicio});
 
@@ -52,13 +52,15 @@ const ExerciseDetails = props => {
   return (
     <div className="m-sm-30">
       <div className="mb-sm-30">
-        <Breadcrumb
-          routeSegments={[
-            { name: "Material", path: "/material" },
-            { name: "Table" }
-          ]}
-        />
-      </div>
+          <Breadcrumb
+            routeSegments={[
+              { name: "Meus Cursos", path: "#"  },
+              { name: "Detalhes de curso", path: "#"  },
+              { name: "Detalhes de aula", path: "#" },
+              { name: "Detalhes de exercício"},
+            ]}
+          />
+        </div>
 
       <div style={{marginBottom: '25px'}}>
         <SimpleCard  title={`Exercício - ${exercicio.nome_exercicio}`}>
@@ -91,7 +93,7 @@ const ExerciseDetails = props => {
                 <TableBody>
                   
                     {movimentacoes.map((movimentacao, index) => (
-                      <Fragment>
+                      <Fragment key={movimentacao.id}>
                         {movimentacao.release_type == "D" ? 
                         
                           <TableRow>
@@ -154,7 +156,7 @@ const ExerciseDetails = props => {
                 <TableBody>
                   
                     {movimentacoes.map((movimentacao, index) => (
-                      <Fragment>
+                      <Fragment key={movimentacao.id}>
                         {movimentacao.release_type == "C" ? 
                         
                           <TableRow>

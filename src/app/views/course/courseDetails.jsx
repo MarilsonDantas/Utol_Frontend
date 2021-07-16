@@ -22,8 +22,8 @@ import { withRouter, Link } from "react-router-dom";
 import { connect } from "react-redux";
 
 const CourseDetails = props => {
-    const [aulas, setAulas] = useState([]);
-    const [curso, setCurso] = useState({});
+    let [aulas, setAulas] = useState([]);
+    let [curso, setCurso] = useState({});
 
     const {id_course} = props.match.params;
 

@@ -4,22 +4,6 @@ export const navigations = [
     path: "/dashboard/home",
     icon: "dashboard"
   },
-  {
-    name: "Movimentações",
-    icon: "description",
-    children: [
-      {
-        name: "Movimentação",
-        path: "/tabelas/professor",
-        iconText: "B"
-      },
-      {
-        name: "Movimentação - Aluno",
-        path: "/tabelas/aluno",
-        iconText: "E"
-      }
-    ]
-  },
   // {
   //   name: "Drag and Drop",
   //   icon: "control_camera",

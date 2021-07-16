@@ -99,8 +99,17 @@ class CriarExercicio extends Component {
       }
     });
 
-    const resultDebito  = [ ...contasDebitoArray, ...contasCreditoArray, ...contasPai.data ];
-    const resultCredito = [ ...contasCreditoArray, ...contasDebitoArray, ...contasPai.data ];
+    contasPai.data.forEach(conta => {
+      if (conta.type == 'D') {
+        contasDebitoArray.push(conta);
+      }        
+      else {
+        contasCreditoArray.push(conta);
+      }
+    });
+
+    const resultDebito  = [ ...contasDebitoArray, ...contasCreditoArray ];
+    const resultCredito = [ ...contasCreditoArray, ...contasDebitoArray ];
 
     this.setState({contasDebito: resultDebito});
     this.setState({contasCredito: resultCredito});
@@ -183,11 +192,16 @@ class CriarExercicio extends Component {
       if (!movimentacaoDebito.quantidadeDebito) 
         movimentacaoDebito.quantidadeDebito = 1;
 
-      if (!movimentacaoDebito.valorInicialDebito) 
+      if (!movimentacaoDebito.valorInicialDebito) {
         movimentacaoDebito.valorInicialDebito = 0;
+        movimentacaoDebito.quantidadeInicialDebito = 0;
+      }
 
       if (movimentacaoDebito.valorDebito && movimentacaoDebito.quantidadeDebito) {
-        movimentacoesPassadas = [...movimentacoesPassadas, (movimentacaoDebito.valorDebito * movimentacaoDebito.quantidadeDebito)];
+        movimentacoesPassadas = [...movimentacoesPassadas, 
+          ((movimentacaoDebito.valorDebito * movimentacaoDebito.quantidadeDebito) + 
+          (movimentacaoDebito.valorInicialDebito * movimentacaoDebito.quantidadeInicialDebito))
+        ];
       }   
 
       movimentacaoDebito.isDebito = true;
@@ -238,7 +252,11 @@ class CriarExercicio extends Component {
         movimentacaoCredito.valorInicialCredito = 0;
 
       if (movimentacaoCredito.valorCredito && movimentacaoCredito.quantidadeCredito) {
-        movimentacoesPassadas = [...movimentacoesPassadas, (movimentacaoCredito.valorCredito * movimentacaoCredito.quantidadeCredito)];
+        movimentacoesPassadas = [...movimentacoesPassadas, 
+          ((movimentacaoCredito.valorCredito * movimentacaoCredito.quantidadeCredito) + 
+          (movimentacaoCredito.valorInicialCredito * movimentacaoCredito.quantidadeInicialCredito))
+        ];
+
       }   
 
       movimentacaoCredito.isCredito = true;
@@ -263,7 +281,19 @@ class CriarExercicio extends Component {
   handleModaDebitoClose = () => {
     this.setState({
       modalDebitoOpen: false,
-      totalAux: 0
+      totalAux: 0,
+      
+      nomeContaCredito: "",
+      valorCredito: "",
+      quantidadeCredito: 1,
+      valorInicialCredito: 0,
+      quantidadeInicialCredito: 0,
+
+      nomeContaDebito: "",
+      valorDebito: "",
+      quantidadeDebito: 1,
+      valorInicialDebito: 0,
+      quantidadeInicialDebito: 0,
     })
   }
 
@@ -278,7 +308,19 @@ class CriarExercicio extends Component {
   handleModalCreditoClose = () => {
     this.setState({
       modalCreditoOpen: false,
-      totalAux: 0
+      totalAux: 0,
+
+      nomeContaCredito: "",
+      valorCredito: "",
+      quantidadeCredito: 1,
+      valorInicialCredito: 0,
+      quantidadeInicialCredito: 0,
+
+      nomeContaDebito: "",
+      valorDebito: "",
+      quantidadeDebito: 1,
+      valorInicialDebito: 0,
+      quantidadeInicialDebito: 0,
     })
   }
 
@@ -698,7 +740,7 @@ class CriarExercicio extends Component {
           aria-labelledby="form-dialog-title"
         >
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}} >
-            <DialogTitle id="form-dialog-title">Movimentação Débito - {categoryValue.category}</DialogTitle>
+            <DialogTitle id="form-dialog-title" style={{maxWidth: '350px'}}>Movimentação Débito - {categoryValue.category}</DialogTitle>
             <TextField
               style={{marginTop: '15px', maxWidth: '150px', marginRight: '16px', padding: 0}}
               value={totalAux}
@@ -784,7 +826,7 @@ class CriarExercicio extends Component {
                         type="text"
                         fullWidth
                         value={valorDebito}
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeDebito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeDebito * event.target.value) });}}
                         validators={[
                           "required",
                         ]}
@@ -800,7 +842,7 @@ class CriarExercicio extends Component {
                         type="text"
                         fullWidth
                         value={quantidadeDebito}
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.valorDebito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux:  this.state.totalAux + (this.state.valorDebito * event.target.value) });}}
                         validators={[
                           "required",
                         ]}
@@ -819,7 +861,7 @@ class CriarExercicio extends Component {
                       type="text"
                       fullWidth
                       value={valorDebito}
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeDebito * event.target.value) });}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux:  this.state.totalAux + (this.state.quantidadeDebito * event.target.value) });}}
                       validators={[
                         "required",
                       ]}
@@ -891,7 +933,7 @@ class CriarExercicio extends Component {
                       label="Valor de saldo inicial"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event)}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialDebito * event.target.value) });}}
                     />
                   </Grid>
 
@@ -904,7 +946,7 @@ class CriarExercicio extends Component {
                       label="Quantidade inicial"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event)}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialDebito * event.target.value) });}}
                     />
                   </Grid>
                   }
@@ -1024,7 +1066,7 @@ class CriarExercicio extends Component {
                         label="Valor"
                         type="text"
                         fullWidth
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeCredito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeCredito * event.target.value) });}}
                         value={valorCredito}
                         validators={[
                           "required",
@@ -1040,7 +1082,7 @@ class CriarExercicio extends Component {
                         label="Quantidade"
                         type="text"
                         fullWidth
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.valorCredito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorCredito * event.target.value) });}}
                         value={quantidadeCredito}
                         validators={[
                           "required",
@@ -1104,7 +1146,7 @@ class CriarExercicio extends Component {
                       label="Valor de saldo inicial"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event)}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialCredito * event.target.value) });}}
                     />
                   </Grid>
 
@@ -1115,7 +1157,7 @@ class CriarExercicio extends Component {
                       label="Quantidade inicial"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event)}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialCredito * event.target.value) });}}
                     />
                   </Grid>
 
