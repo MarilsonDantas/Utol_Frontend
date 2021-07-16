@@ -826,7 +826,7 @@ class CriarExercicio extends Component {
                         type="text"
                         fullWidth
                         value={valorDebito}
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeDebito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.quantidadeDebito * event.target.value });}}
                         validators={[
                           "required",
                         ]}
@@ -842,7 +842,7 @@ class CriarExercicio extends Component {
                         type="text"
                         fullWidth
                         value={quantidadeDebito}
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux:  this.state.totalAux + (this.state.valorDebito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.valorDebito * event.target.value });}}
                         validators={[
                           "required",
                         ]}
@@ -861,7 +861,7 @@ class CriarExercicio extends Component {
                       type="text"
                       fullWidth
                       value={valorDebito}
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux:  this.state.totalAux + (this.state.quantidadeDebito * event.target.value) });}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: event.target.value });}}
                       validators={[
                         "required",
                       ]}
@@ -882,6 +882,7 @@ class CriarExercicio extends Component {
 
 
                     {categoryValue.attribute == 'financeiro' ? 
+                      <>
                       <Grid item lg={7} md={7} sm={12} xs={12} style={{marginTop: '5px' }}>
 
                         <Autocomplete
@@ -902,41 +903,54 @@ class CriarExercicio extends Component {
                           )}
                         />
                       </Grid>
+
+                        <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px'}} >
+                          <TextValidator
+                            variant="outlined"
+                            name="valorInicialDebito"
+                            label="Valor de saldo inicial"
+                            type="text"
+                            fullWidth
+                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + parseInt(event.target.value) });}}
+                          />
+                        </Grid>
+                      </>
                       :
-                      <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px' }}>
-                        <Autocomplete
-                          className="mb-6 w-full"
-                          closeIcon={false}
-                          options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
-                          onChange={this.onTagsChangeDebito}
-                          className="tipo"
-                          getOptionLabel={option => option.label}
-                          renderInput={params => (
-                            <TextField
-                              {...params}
-                              label={"Métrica"}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          )}
-                        />  
-                      </Grid>                  
+                      <>
+                        <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px' }}>
+                          <Autocomplete
+                            className="mb-6 w-full"
+                            closeIcon={false}
+                            options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
+                            onChange={this.onTagsChangeDebito}
+                            className="tipo"
+                            getOptionLabel={option => option.label}
+                            renderInput={params => (
+                              <TextField
+                                {...params}
+                                label={"Métrica"}
+                                variant="outlined"
+                                fullWidth
+                              />
+                            )}
+                          />
+                        </Grid>  
+                       
+
+                       <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }} >
+                          <TextValidator
+                            variant="outlined"
+                            name="valorInicialDebito"
+                            label="Valor de saldo inicial"
+                            type="text"
+                            fullWidth
+                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialDebito * parseInt(event.target.value)) });}}
+                          />
+                        </Grid>  
+                      </>              
                     }
 
-                   
                   
-
-                  <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }} >
-                    <TextValidator
-                      variant="outlined"
-                      name="valorInicialDebito"
-                      label="Valor de saldo inicial"
-                      type="text"
-                      fullWidth
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialDebito * event.target.value) });}}
-                    />
-                  </Grid>
-
                   {categoryValue.attribute == "quantitativo" && 
 
                   <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
@@ -946,7 +960,7 @@ class CriarExercicio extends Component {
                       label="Quantidade inicial"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialDebito * event.target.value) });}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialDebito * parseInt(event.target.value)) });}}
                     />
                   </Grid>
                   }
@@ -980,7 +994,7 @@ class CriarExercicio extends Component {
           aria-labelledby="form-dialog-title"
         >
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}} >
-            <DialogTitle id="form-dialog-title">Movimentação Credito - {categoryValue.category}</DialogTitle>
+            <DialogTitle id="form-dialog-title" style={{maxWidth: '350px'}}>Movimentação Credito - {categoryValue.category}</DialogTitle>
             <TextField
               style={{marginTop: '15px', maxWidth: '150px', marginRight: '16px', padding: 0}}
               value={totalAux}
@@ -1066,7 +1080,7 @@ class CriarExercicio extends Component {
                         label="Valor"
                         type="text"
                         fullWidth
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeCredito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.quantidadeCredito * event.target.value });}}
                         value={valorCredito}
                         validators={[
                           "required",
@@ -1082,7 +1096,7 @@ class CriarExercicio extends Component {
                         label="Quantidade"
                         type="text"
                         fullWidth
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorCredito * event.target.value) });}}
+                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.valorCredito * event.target.value });}}
                         value={quantidadeCredito}
                         validators={[
                           "required",
@@ -1121,34 +1135,78 @@ class CriarExercicio extends Component {
 
                 <Grid container style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px', marginBottom: '0px', marginRight: '16px', marginLeft: '16px'}}>
 
-                  <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }} >
-                    <Autocomplete
-                      className="mb-6 w-full"
-                      options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
-                      onChange={this.onTagsChangeCredito}
-                      className="tipo"
-                      getOptionLabel={option => option.label}
-                      renderInput={params => (
-                        <TextField
-                          {...params}
-                          label={"Métrica"}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      )}
-                    />
-                  </Grid>
 
-                  <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }} >
-                    <TextValidator
-                      variant="outlined"
-                      name="valorInicialCredito"
-                      label="Valor de saldo inicial"
-                      type="text"
-                      fullWidth
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialCredito * event.target.value) });}}
-                    />
-                  </Grid>
+                    {categoryValue.attribute == 'financeiro' ? 
+                      <>
+                      <Grid item lg={7} md={7} sm={12} xs={12} style={{marginTop: '5px' }}>
+
+                        <Autocomplete
+                          className="mb-6 w-full"
+                          defaultValue={{ label: 'Financeiro' }}
+                          options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
+                          onChange={this.onTagsChangeCredito}
+                          className="tipo"
+                          getOptionLabel={option => option.label}
+                          disabled={true}
+                          renderInput={params => (
+                            <TextField
+                              {...params}
+                              label={"Métrica"}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          )}
+                        />
+                      </Grid>
+
+                        <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px'}} >
+                          <TextValidator
+                            variant="outlined"
+                            name="valorInicialCredito"
+                            label="Valor de saldo inicial"
+                            type="text"
+                            fullWidth
+                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + parseInt(event.target.value) });}}
+                          />
+                        </Grid>
+                      </>
+                      :
+                      <>
+                        <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px' }}>
+                          <Autocomplete
+                            className="mb-6 w-full"
+                            closeIcon={false}
+                            options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
+                            onChange={this.onTagsChangeCredito}
+                            className="tipo"
+                            getOptionLabel={option => option.label}
+                            renderInput={params => (
+                              <TextField
+                                {...params}
+                                label={"Métrica"}
+                                variant="outlined"
+                                fullWidth
+                              />
+                            )}
+                          />
+                        </Grid>  
+                      
+
+                      <Grid item lg={4} md={4} sm={12} xs={12} style={{marginTop: '5px', }} >
+                          <TextValidator
+                            variant="outlined"
+                            name="valorInicialCredito"
+                            label="Valor de saldo inicial"
+                            type="text"
+                            fullWidth
+                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialCredito * parseInt(event.target.value)) });}}
+                          />
+                        </Grid>  
+                      </>              
+                    }
+
+                  
+                  {categoryValue.attribute == "quantitativo" && 
 
                   <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
                     <TextValidator
@@ -1157,10 +1215,10 @@ class CriarExercicio extends Component {
                       label="Quantidade inicial"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialCredito * event.target.value) });}}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialCredito * parseInt(event.target.value)) });}}
                     />
                   </Grid>
-
+                  }
                   
                 </Grid>
               }
