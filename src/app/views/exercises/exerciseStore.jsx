@@ -119,6 +119,60 @@ class CriarExercicio extends Component {
     this.setState({ [e.target.name]: e.target.value });
   };
 
+  handleEditDebito = (e, id) => {
+    // this.state.movimentacaoDebito.map(movimentacao => {
+    //   if (movimentacao.id == id) {
+    //     this.setState({ movimentacao: e.target.value });
+    //     movimentacao.nomeContaDebito = e.target.value;
+    //     // console.log(movimentacao);
+    //   }
+    // })
+
+    
+    // const {name, value} = e.target,
+    //     index = e.target.getAttribute('data-index'), //custom attribute value
+    //     updatedObj = Object.assign({}, this.state.movimentacaoDebito[i],{[name]: value});
+      
+    //   //update state value.
+    //   this.setState({
+    //     movimentacaoDebito: [
+    //       ...this.state.movimentacaoDebito.slice(0, index),
+    //       updatedObj,
+    //       ...this.state.movimentacaoDebito.slice(index + 1)
+    //     ]
+    //   })
+
+
+    // this.setState({
+    //   data: this.state.data.map(el => (el.id === id ? Object.assign({}, el, { text }) : el))
+    // });
+
+    // this.setState({
+    //   movimentacaoDebito: this.state.movimentacaoDebito.map(
+    //     movimentacao => (movimentacao.id === id ? Object.assign({}, movimentacao, { text }) : movimentacao)
+    //   )
+    // });
+    
+    // let value = e.target.value;
+
+    // this.setState(prevState => ({
+    //   ...prevState,
+    //   movimentacaoDebito: prevState.movimentacaoDebito.map(movimentacao => ({
+    //     ...movimentacao,
+    //     nomeContaDebito: movimentacao.id === id ? e.target.value : movimentacao.nomeContaDebito
+    //   }))
+    // }))
+
+    // this.setState(prevState => ({
+    //   ...prevState,
+    //   cards: prevState.cards.map(card => ({
+    //     ...card,
+    //     like: card.id === id ? card.like + 1 : card.like
+    //   }))
+    // }))
+
+  }
+
   handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -189,7 +243,7 @@ class CriarExercicio extends Component {
     var movimentacoesPassadas = [];
 
     this.state.movimentacaoDebito.forEach(movimentacaoDebito => {
-      if (!movimentacaoDebito.quantidadeDebito) 
+      if (!movimentacaoDebito.quantidadeDebito && movimentacaoDebito.attribute == 'quantitativo') 
         movimentacaoDebito.quantidadeDebito = 1;
 
       if (!movimentacaoDebito.valorInicialDebito) {
@@ -197,14 +251,22 @@ class CriarExercicio extends Component {
         movimentacaoDebito.quantidadeInicialDebito = 0;
       }
 
-      if (movimentacaoDebito.valorDebito && movimentacaoDebito.quantidadeDebito) {
-        movimentacoesPassadas = [...movimentacoesPassadas, 
-          ((movimentacaoDebito.valorDebito * movimentacaoDebito.quantidadeDebito) + 
-          (movimentacaoDebito.valorInicialDebito * movimentacaoDebito.quantidadeInicialDebito))
-        ];
+      if ((movimentacaoDebito.valorDebito && movimentacaoDebito.quantidadeDebito) || (movimentacaoDebito.valorInicialDebito && movimentacaoDebito.quantidadeInicialDebito)) {
+        
+        if (movimentacaoDebito.attribute == 'financeiro') {
+          movimentacoesPassadas = [...movimentacoesPassadas, 
+            (parseInt(movimentacaoDebito.valorDebito) + parseInt(movimentacaoDebito.valorInicialDebito))
+          ];
+        } else {
+          movimentacoesPassadas = [...movimentacoesPassadas, 
+            ((movimentacaoDebito.valorDebito * movimentacaoDebito.quantidadeDebito) + 
+            (movimentacaoDebito.valorInicialDebito * movimentacaoDebito.quantidadeInicialDebito))
+          ];
+        }        
+        
       }   
-
       movimentacaoDebito.isDebito = true;
+
     });
 
     valorConta = movimentacoesPassadas.reduce((a, b) => a + b, 0);
@@ -251,11 +313,17 @@ class CriarExercicio extends Component {
       if (!movimentacaoCredito.valorInicialCredito) 
         movimentacaoCredito.valorInicialCredito = 0;
 
-      if (movimentacaoCredito.valorCredito && movimentacaoCredito.quantidadeCredito) {
-        movimentacoesPassadas = [...movimentacoesPassadas, 
-          ((movimentacaoCredito.valorCredito * movimentacaoCredito.quantidadeCredito) + 
-          (movimentacaoCredito.valorInicialCredito * movimentacaoCredito.quantidadeInicialCredito))
-        ];
+        if ((movimentacaoCredito.valorCredito && movimentacaoCredito.quantidadeCredito) || (movimentacaoCredito.valorInicialCredito && movimentacaoCredito.quantidadeInicialCredito)) {
+          if (movimentacaoCredito.attribute == 'financeiro') {
+            movimentacoesPassadas = [...movimentacoesPassadas, 
+              (parseInt(movimentacaoCredito.valorCredito) + parseInt(movimentacaoCredito.valorInicialCredito))
+            ];
+          } else {
+            movimentacoesPassadas = [...movimentacoesPassadas, 
+              ((movimentacaoCredito.valorCredito * movimentacaoCredito.quantidadeCredito) + 
+              (movimentacaoCredito.valorInicialCredito * movimentacaoCredito.quantidadeInicialCredito))
+            ];
+          }    
 
       }   
 
@@ -341,7 +409,29 @@ class CriarExercicio extends Component {
       openSnackBar: !this.state.openSnackBar
     });
   }
-  
+
+  removeContaDebito = (category) => {
+
+    let filteredArray = this.state.movimentacaoDebito.filter(movimentacao => movimentacao.id !== category.id)
+    this.setState({
+      movimentacaoDebito: filteredArray, 
+      totalDebito: this.state.totalDebito - ((category.valorDebito * category.quantidadeDebito) + (category.valorInicialDebito * category.quantidadeInicialDebito)),
+      modalDebitoOpen: false
+    });
+
+  }
+
+  removeContaCredito = (category) => {
+
+    let filteredArray = this.state.movimentacaoCredito.filter(movimentacao => movimentacao.id !== category.id)
+    this.setState({
+      movimentacaoCredito: filteredArray, 
+      totalCredito: this.state.totalCredito - ((category.valorCredito * category.quantidadeCredito) + (category.valorInicialCredito * category.quantidadeInicialCredito)),
+      modalCreditoOpen: false
+    });
+
+  }
+
   render() {
     let {
       openSnackBar,
@@ -362,7 +452,9 @@ class CriarExercicio extends Component {
 
       nomeContaDebito,
       valorDebito,
+      valorInicialDebito,
       quantidadeDebito,
+      quantidadeInicialDebito,
 
       nomeContaCredito,
       valorCredito,
@@ -499,18 +591,25 @@ class CriarExercicio extends Component {
                         {movimentacaoDebito.map((movimentacao, index) => {
 
                           return (
-                            <TableRow key={index}>
+                            <TableRow key={index} onClick={() => {
+                              this.setState({
+                                modalDebitoOpen: true,
+                                categoryValue: movimentacao,
+                                totalAux: 0
+                            })}}>
                             
                               {/* NOME DA CONTA */}
                               {movimentacao.is_father == null ? 
                                 
                                 <TableCell className="px-0 capitalize" colSpan={2} align="left">
+                                  <h6>{movimentacao.category_father}</h6>
                                   {movimentacao.category}
                                 </TableCell>
                                 
                                 : 
                                 
                                 <TableCell className="px-0 capitalize" colSpan={2} align="left">
+                                  <h6>{movimentacao.category}</h6>
                                   {movimentacao.nomeContaDebito}
                                 </TableCell>
                               }
@@ -524,12 +623,11 @@ class CriarExercicio extends Component {
                               {/* QUANTIDADE */}
                               {movimentacao.attribute == "quantitativo" ? 
 
-
                                 <TableCell className="px-0" align="center" colSpan={1}>
                                   {movimentacao.quantidadeDebito}
                                 </TableCell>
 
-                              : 
+                                : 
                                                               
                                 <TableCell className="px-0" align="center" colSpan={1}>
                                   -
@@ -537,30 +635,47 @@ class CriarExercicio extends Component {
                               }
 
                               {/* Métrica */}
-                              {movimentacao.is_father == null ? 
-                              
+                              {movimentacao.is_father == null ?                               
                                 <TableCell className="px-0 capitalize" colSpan={4} align="center" colSpan={1}>
-                                  -
-                                </TableCell>
-                                
+                                  {movimentacao.attribute}
+                                </TableCell>                                
                                 : 
                                 <Fragment>
-                                  <TableCell className="px-0" align="center" colSpan={1}>
-                                    {movimentacao.metricaDebito}
-                                  </TableCell>
-                                </Fragment>
-                                
+                                  {movimentacao.attribute == "financeiro" ? 
+                                    <TableCell className="px-0" align="center" colSpan={1}>
+                                      Financeiro
+                                    </TableCell>
+                                    :
+                                    <TableCell className="px-0" align="center" colSpan={1}>
+                                      {movimentacao.metricaDebito ? movimentacao.metricaDebito : 'Indefinido'}
+                                    </TableCell>
+                                  }                                  
+                                </Fragment>                                
                               }
 
+
                               {/* VALOR INICIAL */}
-                              <TableCell className="px-0" align="center" colSpan={1}>
-                                {movimentacao.valorInicialDebito}
-                              </TableCell>
+                              {movimentacao.is_father ? 
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  {movimentacao.valorInicialDebito}
+                                </TableCell>
+                                :                                                               
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  -
+                                </TableCell>
+                              }
+
 
                               {/* QUANTIDADE INICIAL */}
-                              <TableCell className="px-0" align="center" colSpan={1}>
-                                {movimentacao.quantidadeInicialDebito}
-                              </TableCell>
+                              {movimentacao.attribute == "quantitativo" && movimentacao.is_father ? 
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  {movimentacao.quantidadeInicialDebito}
+                                </TableCell>
+                                :                                                               
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  -
+                                </TableCell>
+                              }
 
                             </TableRow>
                           )
@@ -588,7 +703,6 @@ class CriarExercicio extends Component {
                       className="mb-6 w-full"
                       options={contasCredito}
                       onChange={this.modalCreditoOpen}
-                      closeIcon={false}
                       name="tipo"
                       getOptionLabel={option => option.category}
                       renderInput={params => (
@@ -644,70 +758,93 @@ class CriarExercicio extends Component {
                       {movimentacaoCredito.map((movimentacao, index) => {
 
                         return (
-                          <TableRow key={index}>
-                          
-                            {/* NOME DA CONTA */}
-                            {movimentacao.is_father == null ? 
-                              
-                              <TableCell className="px-0 capitalize" colSpan={2} align="left">
-                                {movimentacao.category}
-                              </TableCell>
-                              
-                              : 
-                              
-                              <TableCell className="px-0 capitalize" colSpan={2} align="left">
-                                {movimentacao.nomeContaCredito}
-                              </TableCell>
-                            }
-
-                              
-                            {/* VALOR UNITÁRIO */}
-                            <TableCell className="px-0" align="center" colSpan={1}>
-                              {movimentacao.valorCredito}
-                            </TableCell>
-
-                            {/* QUANTIDADE */}
-                            {movimentacao.attribute == "quantitativo" ? 
-
-
-                              <TableCell className="px-0" align="center" colSpan={1}>
-                                {movimentacao.quantidadeCredito}
-                              </TableCell>
-
-                            : 
-                                                            
-                              <TableCell className="px-0" align="center" colSpan={1}>
-                                -
-                              </TableCell>
-                            }
-
-                            {/* metrica */}
-                            {movimentacao.is_father == null ? 
+                          <TableRow key={index} onClick={() => {
+                            this.setState({
+                              modalCreditoOpen: true,
+                              categoryValue: movimentacao,
+                              totalAux: 0
+                          })}}>
                             
-                              <TableCell className="px-0 capitalize" colSpan={4} align="center" colSpan={1}>
-                                -
-                              </TableCell>
-                              
-                              : 
-                              <Fragment>
-                                <TableCell className="px-0" align="center" colSpan={1}>
-                                  {movimentacao.metricaCredito}
+                              {/* NOME DA CONTA */}
+                              {movimentacao.is_father == null ? 
+                                
+                                <TableCell className="px-0 capitalize" colSpan={2} align="left">
+                                  <h6>{movimentacao.category_father}</h6>
+                                  {movimentacao.category}
                                 </TableCell>
-                              </Fragment>
-                              
-                            }
+                                
+                                : 
+                                
+                                <TableCell className="px-0 capitalize" colSpan={2} align="left">
+                                  <h6>{movimentacao.category}</h6>
+                                  {movimentacao.nomeContaCredito}
+                                </TableCell>
+                              }
 
-                            {/* VALOR INICIAL */}
-                            <TableCell className="px-0" align="center" colSpan={1}>
-                              {movimentacao.valorInicialCredito}
-                            </TableCell>
+                                
+                              {/* VALOR UNITÁRIO */}
+                              <TableCell className="px-0" align="center" colSpan={1}>
+                                {movimentacao.valorCredito}
+                              </TableCell>
 
-                            {/* QUANTIDADE INICIAL */}
-                            <TableCell className="px-0" align="center" colSpan={1}>
-                              {movimentacao.quantidadeInicialCredito}
-                            </TableCell>
+                              {/* QUANTIDADE */}
+                              {movimentacao.attribute == "quantitativo" ? 
 
-                          </TableRow>
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  {movimentacao.quantidadeCredito}
+                                </TableCell>
+
+                                : 
+                                                              
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  -
+                                </TableCell>
+                              }
+
+                              {/* Métrica */}
+                              {movimentacao.is_father == null ?                               
+                                <TableCell className="px-0 capitalize" colSpan={4} align="center" colSpan={1}>
+                                  {movimentacao.attribute}
+                                </TableCell>                                
+                                : 
+                                <Fragment>
+                                  {movimentacao.attribute == "financeiro" ? 
+                                    <TableCell className="px-0" align="center" colSpan={1}>
+                                      Financeiro
+                                    </TableCell>
+                                    :
+                                    <TableCell className="px-0" align="center" colSpan={1}>
+                                      {movimentacao.metricaCredito ? movimentacao.metricaCredito : 'Indefinido'}
+                                    </TableCell>
+                                  }                                  
+                                </Fragment>                                
+                              }
+
+
+                              {/* VALOR INICIAL */}
+                              {movimentacao.is_father ? 
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  {movimentacao.valorInicialCredito}
+                                </TableCell>
+                                :                                                               
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  -
+                                </TableCell>
+                              }
+
+
+                              {/* QUANTIDADE INICIAL */}
+                              {movimentacao.attribute == "quantitativo" && movimentacao.is_father ? 
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  {movimentacao.quantidadeInicialCredito}
+                                </TableCell>
+                                :                                                               
+                                <TableCell className="px-0" align="center" colSpan={1}>
+                                  -
+                                </TableCell>
+                              }
+
+                            </TableRow>
                         )
 
 
@@ -732,8 +869,10 @@ class CriarExercicio extends Component {
           </div>
         </SimpleCard>
 
-
+          
         {/* MODAL DEBITO */}
+        {categoryValue && 
+        
         <Dialog
           open={modalDebitoOpen}
           onClose={this.handleModaDebitoClose}
@@ -743,7 +882,12 @@ class CriarExercicio extends Component {
             <DialogTitle id="form-dialog-title" style={{maxWidth: '350px'}}>Movimentação Débito - {categoryValue.category}</DialogTitle>
             <TextField
               style={{marginTop: '15px', maxWidth: '150px', marginRight: '16px', padding: 0}}
-              value={totalAux}
+              value={
+                categoryValue.valorDebito ? 
+                ((categoryValue.valorDebito * categoryValue.quantidadeDebito) + (categoryValue.valorInicialDebito * categoryValue.quantidadeInicialDebito))
+                : 
+                totalAux
+              }
               label={"Total"}
               variant="outlined"
               fullWidth
@@ -766,6 +910,7 @@ class CriarExercicio extends Component {
             
               <Grid container style={{display: 'flex', justifyContent: 'space-between', marginRight: '16px', marginLeft: '16px'}}>
 
+                {/* NOME */}
                 {categoryValue.is_father ?
                   <>
                   {categoryValue.attribute == "quantitativo" ? 
@@ -777,8 +922,8 @@ class CriarExercicio extends Component {
                         type="text"
                         fullWidth
                         name="nomeContaDebito"
-                        onChange={(event) => {this.handleChange(event)}}
-                        value={nomeContaDebito}
+                        onChange={(event) => { this.handleChange(event) }}
+                        value={categoryValue.nomeContaDebito ? categoryValue.nomeContaDebito : nomeContaDebito}
                         validators={[
                           "required",
                         ]}
@@ -794,8 +939,9 @@ class CriarExercicio extends Component {
                         type="text"
                         fullWidth
                         name="nomeContaDebito"
-                        onChange={(event) => {this.handleChange(event)}}
-                        value={nomeContaDebito}
+                        onChange={(event) => { this.handleChange(event) }}
+                        // onChange={(event) => { categoryValue.nomeContaDebito ? this.handleEditDebito(event, categoryValue.id) : this.handleChange(event) }}
+                        value={categoryValue.nomeContaDebito ? categoryValue.nomeContaDebito : nomeContaDebito}
                         validators={[
                           "required",
                         ]}
@@ -825,8 +971,12 @@ class CriarExercicio extends Component {
                         label="Valor"
                         type="text"
                         fullWidth
-                        value={valorDebito}
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.quantidadeDebito * event.target.value });}}
+                        value={categoryValue.valorDebito ? categoryValue.valorDebito : valorDebito}
+                        onChange={(event) => {
+                          this.handleChange(event); 
+                          this.setState(
+                            { totalAux: (parseInt(event.target.value) * this.state.quantidadeDebito ) + (this.state.quantidadeInicialDebito * this.state.valorInicialDebito) }
+                        );}}
                         validators={[
                           "required",
                         ]}
@@ -841,8 +991,12 @@ class CriarExercicio extends Component {
                         label="Quantidade"
                         type="text"
                         fullWidth
-                        value={quantidadeDebito}
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.valorDebito * event.target.value });}}
+                        value={categoryValue.quantidadeDebito ? categoryValue.quantidadeDebito : quantidadeDebito}
+                        onChange={(event) => {
+                          this.handleChange(event); 
+                          this.setState(
+                            { totalAux: (parseInt(event.target.value) * this.state.valorDebito) + (this.state.quantidadeInicialDebito * this.state.valorInicialDebito) }
+                        );}}
                         validators={[
                           "required",
                         ]}
@@ -860,7 +1014,7 @@ class CriarExercicio extends Component {
                       label="Valor"
                       type="text"
                       fullWidth
-                      value={valorDebito}
+                      value={categoryValue.valorDebito ? categoryValue.valorDebito : valorDebito}
                       onChange={(event) => {this.handleChange(event); this.setState({ totalAux: event.target.value });}}
                       validators={[
                         "required",
@@ -875,7 +1029,7 @@ class CriarExercicio extends Component {
 
               </Grid>
 
-
+              
               {categoryValue.is_father &&
 
                 <Grid container style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px', marginBottom: '0px', marginRight: '16px', marginLeft: '16px'}}>
@@ -888,6 +1042,7 @@ class CriarExercicio extends Component {
                         <Autocomplete
                           className="mb-6 w-full"
                           defaultValue={{ label: 'Financeiro' }}
+                          value={{ label: 'Financeiro' }}
                           options={[{label: 'Financeiro'}, {label: "Quilograma"}, {label: "Metros"}]}
                           onChange={this.onTagsChangeDebito}
                           className="tipo"
@@ -911,7 +1066,12 @@ class CriarExercicio extends Component {
                             label="Valor de saldo inicial"
                             type="text"
                             fullWidth
-                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + parseInt(event.target.value) });}}
+                            value={categoryValue.valorInicialDebito ? categoryValue.valorInicialDebito : null}
+                            onChange={(event) => {
+                              this.handleChange(event); 
+                              this.setState(
+                                { totalAux: (this.state.valorDebito * this.state.quantidadeDebito ) + (parseInt(event.target.value)) }
+                            );}}
                           />
                         </Grid>
                       </>
@@ -944,7 +1104,12 @@ class CriarExercicio extends Component {
                             label="Valor de saldo inicial"
                             type="text"
                             fullWidth
-                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialDebito * parseInt(event.target.value)) });}}
+                            value={categoryValue.valorInicialDebito ? categoryValue.valorInicialDebito : null}
+                            onChange={(event) => {
+                              this.handleChange(event); 
+                              this.setState(
+                                { totalAux: (this.state.valorDebito * this.state.quantidadeDebito ) + (this.state.quantidadeInicialDebito * parseInt(event.target.value)) }
+                            );}}
                           />
                         </Grid>  
                       </>              
@@ -953,16 +1118,21 @@ class CriarExercicio extends Component {
                   
                   {categoryValue.attribute == "quantitativo" && 
 
-                  <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
-                    <TextValidator
-                      variant="outlined"
-                      name="quantidadeInicialDebito"
-                      label="Quantidade inicial"
-                      type="text"
-                      fullWidth
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialDebito * parseInt(event.target.value)) });}}
-                    />
-                  </Grid>
+                    <Grid item lg={3} md={3} sm={12} xs={12} style={{marginTop: '5px', width: '200px'}} >
+                      <TextValidator
+                        variant="outlined"
+                        name="quantidadeInicialDebito"
+                        label="Quantidade inicial"
+                        type="text"
+                        fullWidth
+                        value={categoryValue.quantidadeInicialDebito ? categoryValue.quantidadeInicialDebito : null}
+                        onChange={(event) => {
+                          this.handleChange(event); 
+                          this.setState(
+                            { totalAux: (this.state.valorDebito * this.state.quantidadeDebito ) + (this.state.valorInicialDebito * parseInt(event.target.value)) }
+                        );}}
+                      />
+                    </Grid>
                   }
                   
                 </Grid>
@@ -971,23 +1141,37 @@ class CriarExercicio extends Component {
             </div>
 
 
-          
-            <DialogActions>
-              <Button variant="outlined" color="primary" type="submit">
-                Criar movimentação
-              </Button>
-              <Button onClick={this.handleModaDebitoClose}>
-                Cancelar
-              </Button>
-            </DialogActions>
+            {categoryValue.valorDebito ?
+              <DialogActions>
+                <Button variant="outlined" color="secondary" onClick={()=>{this.removeContaDebito(categoryValue)}}>
+                  Deletar
+                </Button>
+                <Button onClick={this.handleModaDebitoClose}>
+                  Cancelar
+                </Button>
+              </DialogActions>
+              :
+              <DialogActions>
+                  <Button variant="outlined" color="primary" type="submit">
+                    Criar movimentação
+                  </Button>
+                  <Button onClick={this.handleModaDebitoClose}>
+                    Cancelar
+                  </Button>
+                </DialogActions>            
+            }
+            
 
           </ValidatorForm>
 
         </Dialog>
+        }
+        
 
 
         {/* MODAL CREDITO */}
-        
+        {categoryValue &&
+
         <Dialog
           open={modalCreditoOpen}
           onClose={this.handleModalCreditoClose}
@@ -997,7 +1181,12 @@ class CriarExercicio extends Component {
             <DialogTitle id="form-dialog-title" style={{maxWidth: '350px'}}>Movimentação Credito - {categoryValue.category}</DialogTitle>
             <TextField
               style={{marginTop: '15px', maxWidth: '150px', marginRight: '16px', padding: 0}}
-              value={totalAux}
+              value={
+                categoryValue.valorCredito ? 
+                ((categoryValue.valorCredito * categoryValue.quantidadeCredito) + (categoryValue.valorInicialCredito * categoryValue.quantidadeInicialCredito))
+                : 
+                totalAux
+              }              
               label={"Total"}
               variant="outlined"
               fullWidth
@@ -1007,8 +1196,7 @@ class CriarExercicio extends Component {
 
           <ValidatorForm
             ref="form"
-            onSubmit={(event) => {this.handleCreditoReleaseSubmit(categoryValue, event); console.log("onSubmit Credito")}}
-            onError={errors => null}
+            onSubmit={(event) => {this.handleCreditoReleaseSubmit(categoryValue, event);}}
           > 
 
             {categoryValue.is_father ?
@@ -1033,7 +1221,7 @@ class CriarExercicio extends Component {
                         fullWidth
                         name="nomeContaCredito"
                         onChange={(event) => {this.handleChange(event)}}
-                        value={nomeContaCredito}
+                        value={categoryValue.nomeContaCredito ? categoryValue.nomeContaCredito : nomeContaCredito}
                         validators={[
                           "required",
                         ]}
@@ -1050,7 +1238,7 @@ class CriarExercicio extends Component {
                         fullWidth
                         name="nomeContaCredito"
                         onChange={(event) => {this.handleChange(event)}}
-                        value={nomeContaCredito}
+                        value={categoryValue.nomeContaCredito ? categoryValue.nomeContaCredito : nomeContaCredito}
                         validators={[
                           "required",
                         ]}
@@ -1080,8 +1268,12 @@ class CriarExercicio extends Component {
                         label="Valor"
                         type="text"
                         fullWidth
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.quantidadeCredito * event.target.value });}}
-                        value={valorCredito}
+                        onChange={(event) => {
+                          this.handleChange(event); 
+                          this.setState(
+                            { totalAux: (parseInt(event.target.value) * this.state.quantidadeCredito) + (this.state.quantidadeInicialCredito * this.state.valorInicialCredito) }
+                        );}}
+                        value={categoryValue.valorCredito ? categoryValue.valorCredito : valorCredito}
                         validators={[
                           "required",
                         ]}
@@ -1095,9 +1287,13 @@ class CriarExercicio extends Component {
                         name="quantidadeCredito"
                         label="Quantidade"
                         type="text"
+                        value={categoryValue.quantidadeCredito ? categoryValue.quantidadeCredito : quantidadeCredito}
                         fullWidth
-                        onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.valorCredito * event.target.value });}}
-                        value={quantidadeCredito}
+                        onChange={(event) => {
+                          this.handleChange(event); 
+                          this.setState(
+                            { totalAux: (parseInt(event.target.value) * this.state.valorCredito) + (this.state.quantidadeInicialCredito * this.state.valorInicialCredito) }
+                        );}}
                         validators={[
                           "required",
                         ]}
@@ -1115,8 +1311,8 @@ class CriarExercicio extends Component {
                       label="Valor"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: (this.state.quantidadeCredito * event.target.value) });}}
-                      value={valorCredito}
+                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: parseInt(event.target.value) });}}
+                      value={categoryValue.valorCredito ? categoryValue.valorCredito : valorCredito}
                       validators={[
                         "required",
                       ]}
@@ -1166,7 +1362,12 @@ class CriarExercicio extends Component {
                             label="Valor de saldo inicial"
                             type="text"
                             fullWidth
-                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + parseInt(event.target.value) });}}
+                            value={categoryValue.valorInicialCredito ? categoryValue.valorInicialCredito : null}
+                            onChange={(event) => {
+                              this.handleChange(event); 
+                              this.setState(
+                                { totalAux: (this.state.quantidadeCredito * this.state.valorCredito) + parseInt(event.target.value) }
+                            );}}
                           />
                         </Grid>
                       </>
@@ -1199,7 +1400,12 @@ class CriarExercicio extends Component {
                             label="Valor de saldo inicial"
                             type="text"
                             fullWidth
-                            onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.quantidadeInicialCredito * parseInt(event.target.value)) });}}
+                            value={categoryValue.valorInicialCredito ? categoryValue.valorInicialCredito : null}
+                            onChange={(event) => {
+                              this.handleChange(event); 
+                              this.setState(
+                                { totalAux: (this.state.quantidadeCredito * this.state.valorCredito) + (this.state.quantidadeInicialCredito * parseInt(event.target.value)) }
+                            );}}
                           />
                         </Grid>  
                       </>              
@@ -1215,7 +1421,12 @@ class CriarExercicio extends Component {
                       label="Quantidade inicial"
                       type="text"
                       fullWidth
-                      onChange={(event) => {this.handleChange(event); this.setState({ totalAux: this.state.totalAux + (this.state.valorInicialCredito * parseInt(event.target.value)) });}}
+                      value={categoryValue.quantidadeInicialCredito ? categoryValue.quantidadeInicialCredito : null}
+                      onChange={(event) => {
+                        this.handleChange(event); 
+                        this.setState(
+                          { totalAux: (this.state.quantidadeCredito * this.state.valorCredito) + (this.state.valorInicialCredito * parseInt(event.target.value)) }
+                      );}}
                     />
                   </Grid>
                   }
@@ -1225,18 +1436,31 @@ class CriarExercicio extends Component {
 
             </div>
           
-            <DialogActions>
-              <Button variant="outlined" color="primary" type="submit">
-                Criar movimentação
-              </Button>
-              <Button onClick={this.handleModalCreditoClose}>
-                Cancelar
-              </Button>
-            </DialogActions>
+            {categoryValue.valorCredito ?
+              <DialogActions>
+                <Button variant="outlined" color="secondary" onClick={()=>{this.removeContaCredito(categoryValue)}}>
+                  Deletar
+                </Button>
+                <Button onClick={this.handleModalCreditoClose}>
+                  Cancelar
+                </Button>
+              </DialogActions>
+              :
+              <DialogActions>
+                  <Button variant="outlined" color="primary" type="submit">
+                    Criar movimentação
+                  </Button>
+                  <Button onClick={this.handleModalCreditoClose}>
+                    Cancelar
+                  </Button>
+                </DialogActions>            
+            }
 
           </ValidatorForm>
 
         </Dialog>
+        }
+        
 
         <Snackbar open={openSnackBar} autoHideDuration={6000} onClose={this.handleSnackBarClose}>          
           <MuiAlert elevation={6} variant="filled" onClose={this.handleSnackBarClose} severity="warning">
