@@ -112,7 +112,7 @@ const CourseDetails = props => {
                         <TableCell className="px-6" colSpan={4}>
                           Aula
                         </TableCell>
-                        <TableCell className="px-0" colSpan={2}>
+                        <TableCell className="px-0" align="center" colSpan={2}>
                           Exercicios cadastrados
                         </TableCell>
                         <TableCell className="px-0" colSpan={1}>
@@ -132,8 +132,8 @@ const CourseDetails = props => {
                                     <Link to={`/aula/${aula.idaula}`}>{aula.nome}</Link>                    
                                 </TableCell>
 
-                                <TableCell className="px-0" align="left" colSpan={2}>
-                                
+                                <TableCell className="px-0" align="center" colSpan={2}>
+                                  {aula.exercicios}
                                 </TableCell>
                                 <TableCell className="px-0" colSpan={1}>
                                 <IconButton>
